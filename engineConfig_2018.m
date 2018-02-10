@@ -14,7 +14,7 @@ g0 = 9.81; %[m/s^2]
 bar = 100000; %[Pa] 
 %% Design Inputs/Constants
 
-I_total = 600; %[Ns] Input goal total impulse, choose considering Adam Baker's Tank
+I_total = 6000; %[Ns] Input goal total impulse, choose considering Adam Baker's Tank
 F_init = 600; %[N] Input Goal average thrust
 t_burn = I_total/F_init; %[s] total burn time in seconds
 
@@ -110,6 +110,29 @@ Dport_fin = sqrt((4*m_f)/(pi*Lp*rho_f)+Dport_init^2);   %final diameter of the p
 fuelweb=(Dport_fin-Dport_init)/2; %thickness of fuel that gets burnt [SPAD, 7.96]
 
 r = a*((GO_init+GF_init)^n)*(Lp^m);
+
+%% determine nozzle area
+
+%Since the combustion chamber diameter (dport final) and pressure is known,
+%we can determine the throat area required to choke the flow.
+
+A_throat = mdot_propinit*sqrt(gamma*R*T_flame)*((gamma+1)/2)^((gamma+1)/(2*gamma-2))/(P_cc*gamma);
+
+%note for above: used the T_flame as total temperature of flow which is
+%probably inaccurate.
+
+%%% Use F = mdot Ve = mdot Me sqrt(gamma R T0/(1+(gamma-1)/2*Me^2)) and
+%%% then solve for Me
+
+M_exit_target = 3; %this should be updated with the right numbers using thrust req
+
+[~, ~, ~, ~, area] = flowisentropic(gamma, M_exit_target,'mach');
+
+expansionRatio = area;
+
+A_exit = expansionRatio*A_throat;
+
+
 %% key outputs:
 r
 
@@ -130,6 +153,12 @@ Lp
 fuelweb
 
 A_inj
+
+%% export configuration file (used in simulation code)
+
+save constants.mat g0 bar rho_f a n m etac
+save targets.mat I_total F_init t_burn
+save configfile.mat Lp Dport_init mdot_oxinit A_throat A_exit fuelweb
 
 %% References:
 
