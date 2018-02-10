@@ -14,7 +14,7 @@ g0 = 9.81; %[m/s^2]
 bar = 100000; %[Pa] 
 %% Design Inputs/Constants
 
-I_total = 6000; %[Ns] Input goal total impulse, choose considering Adam Baker's Tank
+I_total = 600; %[Ns] Input goal total impulse, choose considering Adam Baker's Tank
 F_init = 600; %[N] Input Goal average thrust
 t_burn = I_total/F_init; %[s] total burn time in seconds
 
