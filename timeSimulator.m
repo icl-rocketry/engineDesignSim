@@ -13,7 +13,7 @@ close all;
 %This script follows Table 7.9 in SPAD almost exactly.
 %It assumes a constant mdot_ox and circular port geometry
 
-%bkjnlm
+
 %#ok<*SAGROW>
 %the line above hides the error message on vector lenth increasing with
 %each step.
