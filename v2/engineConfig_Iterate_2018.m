@@ -2,19 +2,20 @@ clear all;
 clc;
 close all;
 
-%% Version 1
-% Last edited by Dev & Will on Feb 9 2018 1801
+%% Version 2
+% Last edited by Dev & Will on Feb 13 2018 203
 
-%%% This script aims to configure the rocket using Chapter 7 of Space
-%%% Propulsion Analysis and Design (SPAD)
-%%% Rocket Propulsion Elements (RPE)
+%%% This script attempts to determine the local jacobian matrix, perform an
+%%% inverse and 
 
 %% Constants
 g0 = 9.81; %[m/s^2]
 bar = 100000; %[Pa] 
-%% Design Inputs/Constants
 
+lambda = 1;     %nozzle thrust efficiency factor
+P_amb = 1*bar;  %[Pa] ambient pressure;
 
+%% Target Performance
 
 I_total = 6000; %[Ns] Input goal total impulse, choose considering Adam Baker's Tank
 F_init = 600; %[N] Input Goal average thrust
@@ -60,17 +61,20 @@ mdot_oxinit = mdot_propinit-mdot_fuelinit; %[SPAD, eq 7.79]
 %% Determine C* Cstar [PROPEP?]
 
 etac = 0.95; %combustion efficiency [SPAD]
-gamma = 1.24; % ratio of specific heats (guess, but should be properly determined based on chosen O/F)
-m_mol = 0.0262109; %Molar mass (kg/mol)
-R = 8.314/m_mol; %Specific Gas Constant [SPAD, eq 7 .72]
-T_flame = 3300; %[K] Guess!! check with [Propep]
-c_star = etac*sqrt(gamma*R*T_flame)/(gamma*(2/(gamma+1))^((gamma+1)/(2*gamma-2))); %characteristic velocity [SPAD, eq 7.71]
+
+%This function calculates the values below.
+[T_flame, gamma, m_mol, R,c_star] = thermochem(OF,etac);
+
+%gamma = 1.24; % ratio of specific heats (guess, but should be properly determined based on chosen O/F)
+%m_mol = 0.0262109; %Molar mass (kg/mol)
+%R = 8.314/m_mol; %Specific Gas Constant [SPAD, eq 7 .72]
+%T_flame = 3300; %[K] Guess!! check with [Propep]
+%c_star = etac*sqrt(gamma*R*T_flame)/(gamma*(2/(gamma+1))^((gamma+1)/(2*gamma-2))); %characteristic velocity [SPAD, eq 7.71]
 
 
 %% Determine pressure levels
 
 %Combustion Chamber pressure cannot be higher than Max tank pressure. 
-
 
 %dPvalve = ((mdoto/Cdis_valve*Avalve)^2)*1/(2*rhoo); %required pressure drop over valve [RPE Page 282]
 %Pcc + dPinj + dPvalve = Ptank
@@ -79,7 +83,7 @@ Cdis_inj = 0.9; %[RPE page 280]
 Cdis_valve = 1; %[guess]
 
 %P_vap = 55*bar; %[bar] room temp vapour pressure for nitrous, [physics of nitrous oxide] in the drive
-P_tank = P_vap; %given, "nitrous" (?) [see engine_config_v6
+P_tank = P_vap; %given, "nitrous" (?) [see engine_config_v6]
 %P_cc = Pcc_max(A_throat,mdot_prop,c_star); %max chamber pressure limited by tank pressure, materials, etc.
 P_cc = 25*bar; %Chosen based on limits of tank pressurisation, and recommendations of [Physics of nitrous oxide, Aspire Space] in the drive
 
@@ -126,11 +130,12 @@ A_throat = mdot_propinit*sqrt(gamma*R*T_flame)*((gamma+1)/2)^((gamma+1)/(2*gamma
 %%% Use F = mdot Ve = mdot Me sqrt(gamma R T0/(1+(gamma-1)/2*Me^2)) and
 %%% then solve for Me
 
-M_exit_target = 3; %this should be updated with the right numbers using thrust req
+syms Me;
+Me_temp=vpasolve(mdot_propinit*Me*sqrt(gamma*R*T_flame/(1+(gamma-1)/2*Me^2)) == F_init, Me, 3);
 
-[~, ~, ~, ~, area] = flowisentropic(gamma, M_exit_target,'mach');
+M_exit_target = double(Me_temp);
 
-expansionRatio = area;
+[~, ~, ~, ~, expansionRatio] = flowisentropic(gamma, M_exit_target,'mach'); %this is a function in the matlab aerospace toolbox
 
 A_exit = expansionRatio*A_throat;
 
@@ -158,10 +163,11 @@ A_inj
 
 %% export configuration file (used in simulation code)
 
-save constants.mat g0 bar rho_f a n m etac
-save targets.mat I_total F_init t_burn
+save constants.mat g0 bar rho_f a n m etac T_req Cdis_inj Cdis_valve  GO_init lambda P_amb
+save targets.mat I_total F_init %t_burn
 save configfile.mat Lp Dport_init mdot_oxinit A_throat A_exit fuelweb
 
+save inputs.mat  OF Isp_init  P_cc A_valve
 %% References:
 
 %%% [SPAD]: Space Propulsion Analysis and Design (Humble, book)
