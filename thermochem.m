@@ -1,6 +1,9 @@
 function [T_flame, gamma, m_mol, R,c_star] = thermochem(OF,etac)
 
 
+%changes
+
+
 T_flame = 3300;     %[K] should be determined properly
 gamma = 1.24;       %    should be determined properly
 m_mol = 0.0262109;  %Molar mass (kg/mol) should be determined properly
