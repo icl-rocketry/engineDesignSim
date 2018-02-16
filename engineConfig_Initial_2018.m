@@ -27,8 +27,6 @@ bar = 100000; %[Pa]
 lambda = 1;     %nozzle thrust efficiency factor
 P_amb = 1*bar;  %[Pa] ambient pressure;
 
-P_cc = 25*bar; %Chosen based on limits of tank pressurisation, and recommendations of [Physics of nitrous oxide, Aspire Space] in the drive
-
 %% Target Performance
 
 I_total = 0.55*6000; %[Ns] Input goal total impulse, choose considering Adam Baker's Tank
@@ -77,7 +75,7 @@ mdot_oxinit = mdot_propinit-mdot_fuelinit; %[SPAD, eq 7.79]
 etac = 0.95; %combustion efficiency [SPAD]
 
 %This function calculates the values below.
-[T_flame, gamma, m_mol, R,c_star] = thermochem(OF,P_cc,etac);
+[T_flame, gamma, m_mol, R,c_star] = thermochem(OF,etac);
 
 %gamma = 1.24; % ratio of specific heats (guess, but should be properly determined based on chosen O/F)
 %m_mol = 0.0262109; %Molar mass (kg/mol)
@@ -101,6 +99,7 @@ K_inj = 1.5; %guess -> determine with water for preferred injector type
 %P_vap = 55*bar; %[bar] room temp vapour pressure for nitrous, [physics of nitrous oxide] in the drive
 P_tank = P_vap; %given, "nitrous" (?) [see engine_config_v6
 %P_cc = Pcc_max(A_throat,mdot_prop,c_star); %max chamber pressure limited by tank pressure, materials, etc.
+P_cc = 25*bar; %Chosen based on limits of tank pressurisation, and recommendations of [Physics of nitrous oxide, Aspire Space] in the drive
 
 dP_inj = 0.15*P_cc; %must be high enough to isolate feed system from pressure transients in the CC [SPAD Page 232]
 A_inj = mdot_propinit*sqrt(K_inj/(2*rho_fuel*dP_inj));
