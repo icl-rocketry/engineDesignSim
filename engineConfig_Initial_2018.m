@@ -29,7 +29,7 @@ P_amb = 1*bar;  %[Pa] ambient pressure;
 
 %% Target Performance
 
-I_total = 6000; %[Ns] Input goal total impulse, choose considering Adam Baker's Tank
+I_total = 0.55*6000; %[Ns] Input goal total impulse, choose considering Adam Baker's Tank
 F_init = 1.1*600; %[N] Input Goal average thrust
 t_burn = I_total/F_init; %[s] total burn time in seconds
 
@@ -62,7 +62,7 @@ m_f = m_prop - m_ox;
 
 T_req = 5; %[degrees C] Input for 'nitrous;' function: temperature of ox tank contents
 [P_vap, rho_ox, dens_vap] = nitrous(T_req);
-rho_f=953; %density of fuel (kg/m^3), guess, should be determined more accurately
+rho_fuel=953; %density of fuel (kg/m^3), guess, should be determined more accurately
 P_vap = P_vap*bar;
 
 mdot_propinit = F_init/(Isp_init*g0);    %initial mass flow rate (SPAD eq 7.79)
@@ -88,21 +88,28 @@ etac = 0.95; %combustion efficiency [SPAD]
 
 %Combustion Chamber pressure cannot be higher than Max tank pressure. 
 
+
 %dPvalve = ((mdoto/Cdis_valve*Avalve)^2)*1/(2*rhoo); %required pressure drop over valve [RPE Page 282]
 %Pcc + dPinj + dPvalve = Ptank
 %Note Cdis = mdot_actual/mdot_theoretical
 Cdis_inj = 0.9; %[RPE page 280]
 Cdis_valve = 1; %[guess]
+K_inj = 1.5; %guess -> determine with water for preferred injector type
 
 %P_vap = 55*bar; %[bar] room temp vapour pressure for nitrous, [physics of nitrous oxide] in the drive
-P_tank = P_vap; %given, "nitrous" (?) [see engine_config_v6]
+P_tank = P_vap; %given, "nitrous" (?) [see engine_config_v6
 %P_cc = Pcc_max(A_throat,mdot_prop,c_star); %max chamber pressure limited by tank pressure, materials, etc.
-P_cc = 0.8*25*bar; %Chosen based on limits of tank pressurisation, and recommendations of [Physics of nitrous oxide, Aspire Space] in the drive
+P_cc = 25*bar; %Chosen based on limits of tank pressurisation, and recommendations of [Physics of nitrous oxide, Aspire Space] in the drive
 
-A_valve = 0.02; %standin value
+dP_inj = 0.15*P_cc; %must be high enough to isolate feed system from pressure transients in the CC [SPAD Page 232]
+A_inj = mdot_propinit*sqrt(K_inj/(2*rho_fuel*dP_inj));
+d_inj = 2*sqrt(A_inj/pi) %diamter of 1 injector hole
+drill_lim_inj = 0.5e-3; %[m] limit of hole diameter for injector
+holenum_inj = d_inj/drill_lim_inj
+%A_valve = 0.02; %standin valu
 
-A_inj = (mdot_oxinit^2/(2*rho_ox*Cdis_inj^2))*(P_tank - P_cc - (mdot_oxinit/(Cdis_valve*A_valve))^2*(1/(2*rho_ox)))^(-1); % WRONG FIX IT    Design output for area of injector orifices
-dP_inj = ((mdot_oxinit/Cdis_inj*A_inj)^2)*1/(2*rho_ox); %required pressure drop over injector. 
+%A_inj = (mdot_oxinit^2/(2*rho_ox*Cdis_inj^2))*(P_tank - P_cc - (mdot_oxinit/(Cdis_valve*A_valve))^2*(1/(2*rho_ox)))^(-1); % WRONG FIX IT    Design output for area of injector orifices
+%dP_inj = ((mdot_oxinit/Cdis_inj*A_inj)^2)*1/(2*rho_ox); %required pressure drop over injector. 
 
 %% configure combustion port
 %assume single cylindrical port
@@ -121,13 +128,20 @@ a=2.34e-5; %need correct values! Using Paraffin/GOX value from [ref 2, Table 1] 
 n=0.8; %need correct values!
 m=-0.2; %need correct values!
 
-Lp = (((mdot_fuelinit*(pi^(n-1)))/(a*((4*mdot_propinit)^n)*rho_f))*((Dport_init)^(2*n-1)))^(1/(m+1));%length of port (m) [SPAD, eq 7.91]
+Lp = (((mdot_fuelinit*(pi^(n-1)))/(a*((4*mdot_propinit)^n)*rho_fuel))*((Dport_init)^(2*n-1)))^(1/(m+1));%length of port (m) [SPAD, eq 7.91]
 
-Dport_fin = sqrt((4*m_f)/(pi*Lp*rho_f)+Dport_init^2);   %final diameter of the port [SPAD, eq 7.95]
+Dport_fin = sqrt((4*m_f)/(pi*Lp*rho_fuel)+Dport_init^2);   %final diameter of the port [SPAD, eq 7.95]
 
 fuelweb=(Dport_fin-Dport_init)/2; %thickness of fuel that gets burnt [SPAD, 7.96]
 
 r = a*((GO_init+GF_init)^n)*(Lp^m);
+
+
+
+% N Port Wagon Wheel: ALL FROM SPAD FIG. 7.23
+n_max = 3;
+wagon_config = wagon_wheel_geometry(n_max,A_port,mdot_fuelinit,GO_init,a,m,n,rho_fuel,m_f);
+
 
 %% determine nozzle area
 
@@ -175,11 +189,11 @@ A_inj
 
 %% export configuration file (used in simulation code)
 
-save constants.mat g0 bar rho_f a n m etac T_req Cdis_inj Cdis_valve  GO_init lambda P_amb
+save constants.mat g0 bar rho_fuel a n m etac T_req Cdis_inj Cdis_valve  GO_init lambda P_amb
 save targets.mat I_total F_init %t_burn
-save configfile.mat Lp Dport_init mdot_oxinit A_throat A_exit fuelweb
+save configfile.mat Lp Dport_init mdot_oxinit A_throat A_exit fuelweb m_f m_ox
 
-save inputs.mat  OF Isp_init  P_cc A_valve
+save inputs.mat  OF Isp_init  P_cc %A_valve
 %% References:
 
 %%% [SPAD]: Space Propulsion Analysis and Design (Humble, book)

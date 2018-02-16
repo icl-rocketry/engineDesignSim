@@ -13,7 +13,7 @@
 %the line above hides the error message on vector lenth increasing with
 %each step.
 
-% ayy lmao this is a C H A N G E
+
 
 %% Run the config file:
 engineConfig_Initial_2018
@@ -148,6 +148,12 @@ t_axis = 0:deltaT:t_burn_result;
 F_init_result  = F(1)
 
 Isp_avg = mean(Isp)
+
+m_f_total = sum(mdot_fuel)*deltaT
+
+m_ox_total = sum(mdot_ox)*deltaT;
+
+m_prop_total = sum(mdot_prop)*deltaT
 
 save sim_results.mat I_total_result F_init_result
 
