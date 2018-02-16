@@ -38,6 +38,7 @@ t_burn = I_total/F_init; %[s] total burn time in seconds
 
 %% Choose a OF, Then Mass and mass flows 
 
+OF = 5; %oxidiser to fuel ratio (guess, but should be determined to maximise average Isp)
 
 Isp_init=200; %initial guess, should be iteratively maximised
 Isp_avg = 0.98*Isp_init; %[SPAD 7.4.4] Says that the average Isp should be ~2.0%lower than initial
@@ -100,6 +101,7 @@ K_inj = 1.5; %guess -> determine with water for preferred injector type
 %P_vap = 55*bar; %[bar] room temp vapour pressure for nitrous, [physics of nitrous oxide] in the drive
 P_tank = P_vap; %given, "nitrous" (?) [see engine_config_v6
 %P_cc = Pcc_max(A_throat,mdot_prop,c_star); %max chamber pressure limited by tank pressure, materials, etc.
+
 
 dP_inj = 0.15*P_cc; %must be high enough to isolate feed system from pressure transients in the CC [SPAD Page 232]
 A_inj = mdot_propinit*sqrt(K_inj/(2*rho_fuel*dP_inj));
