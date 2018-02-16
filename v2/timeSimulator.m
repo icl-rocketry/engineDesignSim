@@ -1,7 +1,3 @@
-clear all;
-clc;
-close all;
-
 %% Version 1
 % Last edited by Dev on Feb 10 2018
 
@@ -17,6 +13,12 @@ close all;
 %the line above hides the error message on vector lenth increasing with
 %each step.
 
+%% Run the config file:
+engineConfig_Initial_2018
+
+clear all;
+clc;
+close all;
 %% import configuration parameters
 
 load inputs.mat
@@ -153,53 +155,56 @@ qplot = 1;
 
 if qplot == 1
     
+    figure(1);
     
-    figure;
-    plot(t_axis,F)
+    subplot(3,4,1)
+    plot(t_axis,F,[0],[0])
     title('F')
-    
-    figure;
-    plot(t_axis,c_star)
+
+    subplot(3,4,2)
+    plot(t_axis,c_star,[0],[0])
     title('c star')
+
     
-    figure;
-    plot(t_axis,D_port)
+    subplot(3,4,3)
+    plot(t_axis,D_port,[0],[0])
+    
     title('D port')
     
-    figure;
-    plot(t_axis,G_ox)
+    subplot(3,4,4)
+    plot(t_axis,G_ox,[0],[0])
     title('G ox')
     
-    figure;
-    plot(t_axis,G_fuel)
+    subplot(3,4,5)
+    plot(t_axis,G_fuel,[0],[0])
     title('G fuel')
     
-    figure;
-    plot(t_axis,G_prop)
+    subplot(3,4,6)
+    plot(t_axis,G_prop,[0],[0])
     title('G prop')
     
-    figure;
-    plot(t_axis,mdot_fuel)
+    subplot(3,4,7)
+    plot(t_axis,mdot_fuel,[0],[0])
     title('mdot fuel')
     
-    figure;
-    plot(t_axis,Isp)
+    subplot(3,4,8)
+    plot(t_axis,Isp,[0],[0])
     title('Isp')
     
-    figure;
-    plot(t_axis,M_exit)
+    subplot(3,4,9)
+    plot(t_axis,M_exit,[0],[0])
     title('M exit')
     
-    figure;
-    plot(t_axis,OF)
+    subplot(3,4,10)
+    plot(t_axis,OF,[0],[0])
     title('OF')
     
-    figure;
-    plot(t_axis,P_cc)
+    subplot(3,4,11)
+    plot(t_axis,P_cc,[0],[0])
     title('P cc')
     
-    figure;
-    plot(t_axis,P_exit)
+    subplot(3,4,12)
+    plot(t_axis,P_exit,[0],[0])
     title('P exit')
     
 end
