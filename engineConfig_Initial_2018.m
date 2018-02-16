@@ -38,7 +38,7 @@ t_burn = I_total/F_init; %[s] total burn time in seconds
 
 %% Choose a OF, Then Mass and mass flows 
 
-OF = 7; %oxidiser to fuel ratio (guess, but should be determined to maximise average Isp)
+OF = 5; %oxidiser to fuel ratio (guess, but should be determined to maximise average Isp)
 
 Isp_init=200; %initial guess, should be iteratively maximised
 Isp_avg = 0.98*Isp_init; %[SPAD 7.4.4] Says that the average Isp should be ~2.0%lower than initial

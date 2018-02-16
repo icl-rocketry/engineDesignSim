@@ -97,7 +97,7 @@ while qburnfin == 0
         
         OF(ti)=mdot_ox/mdot_fuel(ti);
         
-        [T_flame(ti), gamma(ti), m_mol(ti), R(ti), c_star(ti)] = thermochem(OF,P_cc(ti),etac); % runs a script called thermochem to determine these numbers.
+        [T_flame(ti), gamma(ti), m_mol(ti), R(ti), c_star(ti)] = thermochem(OF(ti),P_cc(ti),etac); % runs a script called thermochem to determine these numbers.
         
         T_stag(ti) = T_flame(ti); %Approximation! Need better formula for stagnation temp of flow
         
