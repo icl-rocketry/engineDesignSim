@@ -1,8 +1,9 @@
-% Created by Shreeyam Kacker 2018-02-16
+% Created by Shreeyam Kacker 2018-02-16 1759
 % ICSEDS-EDP
 % Extracts data for interpolation
 
 % Gets P vs ox/fuel ratio, vs Cp/Cv, T, molecular weight
+% DOES NOT WORK ON MAC OS DUE TO FILE SYSTEM DIFFERENCES
 
 %% Housekeeping
 
@@ -15,18 +16,19 @@ n = 20;
 
 %% Initialization
 
-% Find pressures
+% Get files list
 
 files = ls('*.txt');
 m = size(files, 1);
 
 P_cc_vals = zeros(1, m);
 
+% Find pressures from file inputs
 for i = 1:length(P_cc_vals)
-    P_cc_vals(i) = str2double(files(i, 5:6));
+    P_cc_vals(i) = str2double(files(i, 5:6)) * 1e5;
 end
 
-% Create matrices (subscript i for interp)
+% Create matrices
 
 m_mol_data = zeros(n, m);
 gamma_data = zeros(n, m);
@@ -35,6 +37,7 @@ T_flame_data = zeros(n, m);
 %% Main
 
 for i = 1:length(P_cc_vals)
+    % Read text from file
     text = fileread(files(i, :));
 
     % Molecular weight
@@ -62,9 +65,10 @@ for i = 1:length(P_cc_vals)
 end
 
 function values = findpropepval(text, searchstr, length, offset, skip)
+    % Find indices of search strings
     indices = strfind(text, searchstr);
     
-    % Discard exhaust pressures
+    % Discard exhaust pressures, etc
     indices = indices(1:skip:end);
     
     n = size(indices, 2);
@@ -72,8 +76,9 @@ function values = findpropepval(text, searchstr, length, offset, skip)
     values = zeros(1, n);
     
     for i = 1:n
-       % Magic number to account for PROPEP's output format
+       % Accounting for PROPEP's file format
        value_index = indices(i) + strlength(searchstr) + offset;
+       % Save to output values
        values(i) = str2double(text(value_index:value_index + length));
     end
 end
