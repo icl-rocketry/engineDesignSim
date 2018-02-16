@@ -47,7 +47,7 @@ P_cc(1) = 25*bar;
 
 %%
 
-thresh = 1e-6; % max percentage change before we move on.
+thresh = 1e-6; % [kg m^-2 s^-1]threshold difference in flow flux for iteratively solving fuel reg rate and mass flow rates.
 
 while qburnfin == 0
     
@@ -65,7 +65,7 @@ while qburnfin == 0
         
         rdot(ti) = a*G_prop(ti)^n*Lp^m;
         
-        mdot_fuel(ti) = rdot(ti)*rho_fuel*S(ti);
+        mdot_fuel(ti) = rdot(ti)*rho_f*S(ti);
         
         G_ox(ti) = 4*mdot_ox/(pi*(D_port(ti))^2);
         
@@ -75,7 +75,7 @@ while qburnfin == 0
         
         val(loopind+1) = G_prop(ti);
         
-        if abs(val(loopind)-val(loopind+1))/val(loopind)<thresh
+        if abs(val(loopind)-val(loopind+1))<thresh
             break;
         end
         
@@ -92,26 +92,22 @@ while qburnfin == 0
     end
     
     for loopind = 1:1000
+       
+        P_cc(ti) = val(loopind)
         
-        P_cc(ti) = val(loopind);
-        
-        OF(ti)=mdot_ox/mdot_fuel(ti);
-        
-        [T_flame(ti), gamma(ti), m_mol(ti), R(ti), c_star(ti)] = thermochem(OF(ti),P_cc(ti),etac); % runs a script called thermochem to determine these numbers.
-        
-        T_stag(ti) = T_flame(ti); %Approximation! Need better formula for stagnation temp of flow
-        
-        
-        % 5. determine eng perf
-        
-        P_cc(ti) = mdot_prop(ti)*c_star(ti)/A_throat; %assume there is no throat erosion for now - should be updated
-        
-        val(loopind+1) = P_cc(ti);
-        
-        if abs(val(loopind)-val(loopind+1))/val(loopind)<thresh
-            break;
-        end
-        
+    OF(ti)=mdot_ox/mdot_fuel(ti);
+    
+    [T_flame(ti), gamma(ti), m_mol(ti), R(ti), c_star(ti)] = thermochem(OF,P_cc(ti),etac); % runs a script called thermochem to determine these numbers.
+    
+    T_stag(ti) = T_flame(ti); %Approximation! Need better formula for stagnation temp of flow
+    
+    
+    % 5. determine eng perf
+    
+    P_cc(ti) = mdot_prop(ti)*c_star(ti)/A_throat; %assume there is no throat erosion for now - should be updated
+    
+    val(loopind+1) = P_cc(ti);
+    
     end
     
     P_stag(ti) = P_cc(ti); %approximation! need to check if better formula exists.
@@ -187,11 +183,11 @@ if qplot == 1
     subplot(3,4,1)
     plot(t_axis,F,[0],[0])
     title('F')
-    
+
     subplot(3,4,2)
     plot(t_axis,c_star,[0],[0])
     title('c star')
-    
+
     
     subplot(3,4,3)
     plot(t_axis,D_port,[0],[0])
