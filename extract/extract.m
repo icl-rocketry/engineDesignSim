@@ -64,6 +64,21 @@ for i = 1:length(P_cc_vals)
     end
 end
 
+% Finds a numeric values that is offset some distance from the search
+% string
+
+% ARGUMENTS:
+
+% Text          Text to search
+% Searchstr     Searchstr to look for
+% Length        Characterwise width of numeric value
+% Offset        Distance from search string to value
+% Skip          Discard every (skip)th value
+
+% OUTPUTS:
+
+% Numerical values (double)
+
 function values = findpropepval(text, searchstr, length, offset, skip)
     % Find indices of search strings
     indices = strfind(text, searchstr);
