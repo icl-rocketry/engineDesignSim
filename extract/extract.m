@@ -21,7 +21,7 @@ n = 20;
 files = ls('*.txt');
 m = size(files, 1);
 
-P_cc_vals = zeros(1, m);
+P_cc_vals = zeros(1, m);    % [Pa]
 
 % Find pressures from file inputs
 for i = 1:length(P_cc_vals)
@@ -30,9 +30,9 @@ end
 
 % Create matrices
 
-m_mol_data = zeros(n, m);
-gamma_data = zeros(n, m);
-T_flame_data = zeros(n, m);
+m_mol_data = zeros(n, m);   % [kg/mol]
+gamma_data = zeros(n, m);   % [-]
+T_flame_data = zeros(n, m); % [K]
 
 %% Main
 
@@ -48,7 +48,7 @@ for i = 1:length(P_cc_vals)
     t_f = findpropepval(text, 'T(K)', 4, 67, 2);
     
     % Save to matrices
-    m_mol_data(:, i) = m_mol';
+    m_mol_data(:, i) = m_mol' * 1e-3;  
     gamma_data(:, i) = cpcv';
     T_flame_data(:, i) = t_f';
     
@@ -60,7 +60,7 @@ for i = 1:length(P_cc_vals)
         f = findpropepval(text, 'NYLON 6   POLYAMIDE', 6, 15, 1);
 
         OF_vals = o./f;
-        OF_vals = OF_vals';
+        OF_vals = OF_vals'; % [-]
     end
 end
 
