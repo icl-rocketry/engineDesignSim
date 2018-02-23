@@ -30,7 +30,7 @@ P_amb = 1*bar;  %[Pa] ambient pressure;
 P_cc = 25*bar; %Chosen based on limits of tank pressurisation, and recommendations of [Physics of nitrous oxide, Aspire Space] in the drive
 
 % define port type
-porttype = 1;
+porttype = 2;
 
 
 %% Target Performance
@@ -220,6 +220,10 @@ Lp
 
 
 A_inj
+
+%%
+plotCrossSection(porttype,PortParameters);
+
 
 %% export configuration file (used in simulation code)
 
