@@ -1,4 +1,4 @@
-clear all; 
+clear all;
 clc;
 close all;
 
@@ -22,7 +22,7 @@ close all;
 %%% A small doc should be written to clarify this process.
 %% Constants
 g0 = 9.81; %[m/s^2]
-bar = 100000; %[Pa] 
+bar = 100000; %[Pa]
 
 lambda = 1;     %nozzle thrust efficiency factor
 P_amb = 1*bar;  %[Pa] ambient pressure;
@@ -30,7 +30,7 @@ P_amb = 1*bar;  %[Pa] ambient pressure;
 P_cc = 25*bar; %Chosen based on limits of tank pressurisation, and recommendations of [Physics of nitrous oxide, Aspire Space] in the drive
 
 % define port type
-porttype = 2;
+porttype = 1;
 
 
 %% Target Performance
@@ -41,7 +41,7 @@ t_burn = I_total/F_init; %[s] total burn time in seconds
 
 
 
-%% Choose a OF, Then Mass and mass flows 
+%% Choose a OF, Then Mass and mass flows
 
 OF = 5; %oxidiser to fuel ratio (guess, but should be determined to maximise average Isp)
 
@@ -55,13 +55,13 @@ m_f = m_prop - m_ox;
 
 %% size fuel tanks
 
-%there are two methods: either 
+%there are two methods: either
 % (A) sizing using mission anlysis:
 %   (1) mpayload
 %   (2) Isp:    take avgIsp=0.99*maxIsp
 %   (3) delv:   mission analysis tells you this
 %   (4) finert: around 0.16-0.20 for solid, a bit lower for hybirds
-% or 
+% or
 % (B) sizing for target performance:
 %   (1) It target (total impulse target)
 %   (2) Isp
@@ -93,7 +93,7 @@ etac = 0.95; %combustion efficiency [SPAD]
 
 %% Determine pressure levels
 
-%Combustion Chamber pressure cannot be higher than Max tank pressure. 
+%Combustion Chamber pressure cannot be higher than Max tank pressure.
 
 
 %dPvalve = ((mdoto/Cdis_valve*Avalve)^2)*1/(2*rhoo); %required pressure drop over valve [RPE Page 282]
@@ -116,7 +116,7 @@ holenum_inj = d_inj/drill_lim_inj
 %A_valve = 0.02; %standin valu
 
 %A_inj = (mdot_oxinit^2/(2*rho_ox*Cdis_inj^2))*(P_tank - P_cc - (mdot_oxinit/(Cdis_valve*A_valve))^2*(1/(2*rho_ox)))^(-1); % WRONG FIX IT    Design output for area of injector orifices
-%dP_inj = ((mdot_oxinit/Cdis_inj*A_inj)^2)*1/(2*rho_ox); %required pressure drop over injector. 
+%dP_inj = ((mdot_oxinit/Cdis_inj*A_inj)^2)*1/(2*rho_ox); %required pressure drop over injector.
 
 %% configure combustion port
 %assume single cylindrical port
@@ -131,7 +131,7 @@ switch porttype
         Perimeter_port = pi*Diameter_port_init;
         
     case 2
-        D_outer = 40e-3; %[m]
+        D_outer = 80e-3; %[m]
         tau = 2e-3; %[m] central metal half-thickness
         fuelweb_initialguess = 10e-3;%[m] initial guess -> use this to control output
         
@@ -145,8 +145,6 @@ switch porttype
         PortParameters = [D_outer,fuelweb_initial,tau]; %vector of port parameters
         [~,Perimeter_port] = DPort(D_outer,fuelweb_initial,tau);
 end
-
-
 %Should perform a human check on the suitability of these numbers
 
 
@@ -154,25 +152,30 @@ GF_init = GO_init/OF; %initial fuel flow flux [SPAD, eq 7.83]
 
 %regression rate formula takes form of:
 % r= a G^n L^m where
-a=2.34e-5; %need correct values! Using Paraffin/GOX value from [ref 2, Table 1] - gives rdot in m/sec but uses SI units for 
+a=2.34e-5; %need correct values! Using Paraffin/GOX value from [ref 2, Table 1] - gives rdot in m/sec but uses SI units for
 n=0.8; %need correct values!
 m=-0.2; %need correct values!
 
-Lp = (mdot_fuelinit/(rho_fuel*a*(GO_init+GF_initi)^n*Perimeter_port))^(1/(m+1));
+Lp = (mdot_fuelinit/(rho_fuel*a*(GO_init+GF_init)^n*Perimeter_port))^(1/(m+1));
 
 %Lp = (((mdot_fuelinit*(pi^(n-1)))/(a*((4*mdot_propinit)^n)*rho_fuel))*((Diameter_port_init)^(2*n-1)))^(1/(m+1));%length of port (m) [SPAD, eq 7.91]
 
-Dport_fin = sqrt((4*m_f)/(pi*Lp*rho_fuel)+Diameter_port_init^2);   %final diameter of the port [SPAD, eq 7.95]
-
-fuelweb=(Dport_fin-Diameter_port_init)/2; %thickness of fuel that gets burnt [SPAD, 7.96]
+if porttype ==1
+    %only for circular:
+    Diameter_port_fin = sqrt((4*m_f)/(pi*Lp*rho_fuel)+Diameter_port_init^2);   %final diameter of the port [SPAD, eq 7.95]
+    
+    fuelweb=(Diameter_port_fin-Diameter_port_init)/2; %thickness of fuel that gets burnt [SPAD, 7.96]
+    
+    PortParameters = [Diameter_port_fin,fuelweb];
+end
 
 r = a*((GO_init+GF_init)^n)*(Lp^m);
 
 
 
 % N Port Wagon Wheel: ALL FROM SPAD FIG. 7.23
-n_max = 3;
-wagon_config = wagon_wheel_geometry(n_max,A_port,mdot_fuelinit,GO_init,a,m,n,rho_fuel,m_f);
+%n_max = 3;
+%wagon_config = wagon_wheel_geometry(n_max,A_port,mdot_fuelinit,GO_init,a,m,n,rho_fuel,m_f);
 
 
 %% determine nozzle area
@@ -189,9 +192,9 @@ A_throat = mdot_propinit*sqrt(gamma*R*T_flame)*((gamma+1)/2)^((gamma+1)/(2*gamma
 %%% then solve for Me
 
 syms Me;
-Me_temp=vpasolve(mdot_propinit*Me*sqrt(gamma*R*T_flame/(1+(gamma-1)/2*Me^2)) == F_init, Me, 3);
+Me_tmp=vpasolve(mdot_propinit*Me*sqrt(gamma*R*T_flame/(1+(gamma-1)/2*Me^2)) == F_init, Me, 3); %temporarily store mach exit
 
-M_exit_target = double(Me_temp);
+M_exit_target = double(Me_tmp);
 
 [~, ~, ~, ~, expansionRatio] = flowisentropic(gamma, M_exit_target,'mach'); %this is a function in the matlab aerospace toolbox
 
@@ -203,7 +206,7 @@ r
 
 c_star
 
-m_f 
+m_f
 
 m_ox
 
@@ -211,11 +214,10 @@ mdot_fuelinit
 
 mdot_oxinit
 
-Diameter_port_init
+PortParameters
 
 Lp
 
-fuelweb
 
 A_inj
 
@@ -223,7 +225,7 @@ A_inj
 
 save constants.mat g0 bar rho_fuel a n m etac T_req Cdis_inj Cdis_valve  GO_init lambda P_amb
 save targets.mat I_total F_init %t_burn
-save configfile.mat Lp Diameter_port_init mdot_oxinit A_throat A_exit fuelweb m_f m_ox
+save configfile.mat Lp porttype PortParameters mdot_oxinit A_throat A_exit m_f m_ox
 
 save inputs.mat  OF Isp_init  P_cc %A_valve
 %% References:

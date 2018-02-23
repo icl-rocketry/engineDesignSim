@@ -131,7 +131,7 @@ switch porttype
         Perimeter_port = pi*Diameter_port_init;
         
     case 2
-        D_outer = 40e-3; %[m]
+        D_outer = 80e-3; %[m]
         tau = 2e-3; %[m] central metal half-thickness
         fuelweb_initialguess = 10e-3;%[m] initial guess -> use this to control output
         
@@ -162,17 +162,17 @@ Lp = (mdot_fuelinit/(rho_fuel*a*(GO_init+GF_initi)^n*Perimeter_port))^(1/(m+1));
 
 %Lp = (((mdot_fuelinit*(pi^(n-1)))/(a*((4*mdot_propinit)^n)*rho_fuel))*((Diameter_port_init)^(2*n-1)))^(1/(m+1));%length of port (m) [SPAD, eq 7.91]
 
-Dport_fin = sqrt((4*m_f)/(pi*Lp*rho_fuel)+Diameter_port_init^2);   %final diameter of the port [SPAD, eq 7.95]
+%Dport_fin = sqrt((4*m_f)/(pi*Lp*rho_fuel)+Diameter_port_init^2);   %final diameter of the port [SPAD, eq 7.95]
 
-fuelweb=(Dport_fin-Diameter_port_init)/2; %thickness of fuel that gets burnt [SPAD, 7.96]
+%fuelweb=(Dport_fin-Diameter_port_init)/2; %thickness of fuel that gets burnt [SPAD, 7.96]
 
 r = a*((GO_init+GF_init)^n)*(Lp^m);
 
 
 
 % N Port Wagon Wheel: ALL FROM SPAD FIG. 7.23
-n_max = 3;
-wagon_config = wagon_wheel_geometry(n_max,A_port,mdot_fuelinit,GO_init,a,m,n,rho_fuel,m_f);
+%n_max = 3;
+%wagon_config = wagon_wheel_geometry(n_max,A_port,mdot_fuelinit,GO_init,a,m,n,rho_fuel,m_f);
 
 
 %% determine nozzle area
@@ -189,9 +189,9 @@ A_throat = mdot_propinit*sqrt(gamma*R*T_flame)*((gamma+1)/2)^((gamma+1)/(2*gamma
 %%% then solve for Me
 
 syms Me;
-Me_temp=vpasolve(mdot_propinit*Me*sqrt(gamma*R*T_flame/(1+(gamma-1)/2*Me^2)) == F_init, Me, 3);
+Me_tmp=vpasolve(mdot_propinit*Me*sqrt(gamma*R*T_flame/(1+(gamma-1)/2*Me^2)) == F_init, Me, 3); %temporarily store mach exit
 
-M_exit_target = double(Me_temp);
+M_exit_target = double(Me_tmp);
 
 [~, ~, ~, ~, expansionRatio] = flowisentropic(gamma, M_exit_target,'mach'); %this is a function in the matlab aerospace toolbox
 
@@ -223,7 +223,7 @@ A_inj
 
 save constants.mat g0 bar rho_fuel a n m etac T_req Cdis_inj Cdis_valve  GO_init lambda P_amb
 save targets.mat I_total F_init %t_burn
-save configfile.mat Lp Diameter_port_init mdot_oxinit A_throat A_exit fuelweb m_f m_ox
+save configfile.mat Lp porttype  mdot_oxinit A_throat A_exit fuelweb m_f m_ox
 
 save inputs.mat  OF Isp_init  P_cc %A_valve
 %% References:

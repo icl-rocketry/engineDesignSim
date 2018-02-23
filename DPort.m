@@ -2,7 +2,7 @@ function [area, perimeter] = DPort(D_outer, t, tau)
 
 %D_outer = 60;
 %t = 20;
-a = D_outer-t;
+a = D_outer/2-t;
 %tau = 2;
 
 theta = acos((t+tau)/a);
