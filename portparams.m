@@ -1,13 +1,12 @@
+% 
 function [area, perimeter] = portparams(porttype, arguments)
-
-
 
 switch porttype
     case 1 %cylinder configuration
         D_outer=arguments(1);
         fuelweb=arguments(2);
         
-        a=D_outer-fuelweb; %radius of combustion chamber port
+        a=D_outer/2-fuelweb; %radius of combustion chamber port
         
         area = pi*a^2;
         perimeter = 2*pi*a;

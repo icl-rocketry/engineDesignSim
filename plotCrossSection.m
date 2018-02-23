@@ -8,8 +8,6 @@ switch porttype
         D=PortParameters(1);
         fw=PortParameters(2);
         
-        figure
-        
         %plot the Outer Boundary
         pos = [-D/2 -D/2 D D];
         rectangle('Position',pos,'Curvature',[1 1],'EdgeColor',[0,0,0],'LineWidth',3)
@@ -34,8 +32,6 @@ switch porttype
         fw = PortParameters(2);
         tau = PortParameters(3);
         
-        figure(1)
-        clf
         %plot outer wall
         pos = [-D_outer/2 -D_outer/2 D_outer D_outer];
         rectangle('Position',pos,'Curvature',[1 1],'EdgeColor',[0,0,0],'LineWidth',3)

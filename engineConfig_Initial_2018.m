@@ -36,14 +36,14 @@ porttype = 2;
 %% Target Performance
 
 I_total = 0.55*6000; %[Ns] Input goal total impulse, choose considering Adam Baker's Tank
-F_init = 1.1*600; %[N] Input Goal average thrust
+F_init = 0.85*600; %[N] Input Goal average thrust
 t_burn = I_total/F_init; %[s] total burn time in seconds
 
 
 
 %% Choose a OF, Then Mass and mass flows
 
-OF = 5; %oxidiser to fuel ratio (guess, but should be determined to maximise average Isp)
+OF = 3; %oxidiser to fuel ratio (guess, but should be determined to maximise average Isp)
 
 Isp_init=200; %initial guess, should be iteratively maximised
 Isp_avg = 0.98*Isp_init; %[SPAD 7.4.4] Says that the average Isp should be ~2.0%lower than initial

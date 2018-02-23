@@ -13,7 +13,10 @@
 %the line above hides the error message on vector lenth increasing with
 %each step.
 
-
+%% TODOS:
+% - Change the area equations in order to take into account different areas
+% -- Involves changing things to functions of thickness
+% -- Lines involving 33, 57, 65, 71, 73, 137, 162, 201
 
 %% Run the config file:
 engineConfig_Initial_2018
@@ -28,17 +31,18 @@ load constants.mat
 load targets.mat
 load configfile.mat
 
-D_port(1) = Dport_init;
+% No initial diameter needed - uses port parameters, instead
 
 mdot_ox = mdot_oxinit; %at the moment I assume we can supply this much mass flow rate, although we should really be putting in the value that adam baker gives us.
 
 expansionRatio=A_exit/A_throat;
 
+PortParameters_store = PortParameters;
+
 %% peform simulation
 
 deltaT=0.01; %[s] timestep
 qburnfin = 0; %parameter that determines whether the burn is completed or not (0 when not completed, 1 when completed)
-
 
 t=0;
 ti=1; %time index
@@ -53,7 +57,10 @@ while qburnfin == 0
     
     % 2. determine fuel regression rate & % 3. determine total mass flow rate
     
-    G_ox(ti) = 4*mdot_ox/(pi*(D_port(ti))^2);
+    % Calculating area, perimeter of current port diameter
+    [A_port, P_port] = portparams(porttype, PortParameters_store(ti, :));
+    
+    G_ox(ti) = 4*mdot_ox/(A_port);
     
     G_prop(ti) = G_ox(ti); %as a starting point
     
@@ -61,15 +68,15 @@ while qburnfin == 0
     
     for loopind = 1:1000
         
-        S(ti) = pi*D_port(ti)*Lp;
+        S(ti) = P_port*Lp;
         
         rdot(ti) = a*G_prop(ti)^n*Lp^m;
         
         mdot_fuel(ti) = rdot(ti)*rho_fuel*S(ti);
         
-        G_ox(ti) = 4*mdot_ox/(pi*(D_port(ti))^2);
+        G_ox(ti) = mdot_ox/(A_port);
         
-        G_fuel(ti) = 4*mdot_fuel(ti)./(pi*(D_port(ti))^2); %#ok<*SAGROW>
+        G_fuel(ti) = mdot_fuel(ti)./(A_port); %#ok<*SAGROW>
         
         G_prop(ti) = G_ox(ti)+G_fuel(ti);
         
@@ -128,12 +135,14 @@ while qburnfin == 0
     Isp(ti) = F(ti)/(mdot_prop(ti)*g0);
     
     % 6. update geometry
-    fuelweb(ti+1) = fuelweb(ti)-rdot(ti)*deltaT;
+      
+    PortParameters_store(ti+1, :) = PortParameters_store(ti, :);
     
-    D_port(ti+1) = D_port(ti)+2*rdot(ti)*deltaT;
-    
-    ti=ti+1; %increment the time index
-    t=t+deltaT; %increment the time
+    % Argument 2 is fuelweb
+    PortParameters_store(ti+1, 2) = PortParameters_store(ti, 2) - rdot(ti)*deltaT;
+           
+    ti=ti+1;        %increment the time index
+    t=t+deltaT;     %increment the time
     
     % 8. check if burn is completed, and go to next step
     
@@ -146,7 +155,7 @@ while qburnfin == 0
     % (2) Choked flow
     % (3) fuel is not entirely eaten up
     
-    if fuelweb(end)<=0 %using only condition 3 for now
+    if PortParameters_store(end, 2)<=0 %using only condition 3 for now
         qburnfin=1;
     else
         qburnfin=0;
@@ -154,13 +163,12 @@ while qburnfin == 0
     
 end
 
-fuelweb = fuelweb(1:end-1);
-D_port = D_port(1:end-1);
+PortParameters_store = PortParameters_store(1:end-1, :);
 
 %%
 I_total_result = sum(F)*deltaT
 
-t_burn_result = t
+t_burn_result = t;
 
 t_axis = 0:deltaT:t_burn_result;
 
@@ -194,9 +202,9 @@ if qplot == 1
     
     
     subplot(3,4,3)
-    plot(t_axis,D_port,[0],[0])
+    plot(t_axis,PortParameters_store(:, 2),[0],[0])
     
-    title('D port')
+    title('Fuel web thickness [m]')
     
     subplot(3,4,4)
     plot(t_axis,G_ox,[0],[0])
@@ -234,6 +242,13 @@ if qplot == 1
     plot(t_axis,P_exit,[0],[0])
     title('P exit')
     
+    % Plot cross sections, before and after
+    figure;
+    subplot(1, 2, 1);
+    plotCrossSection(porttype, PortParameters_store(1, :));
+    
+    subplot(1, 2, 2);
+    plotCrossSection(porttype, PortParameters_store(end, :));
 end
 
 
