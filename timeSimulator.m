@@ -14,18 +14,18 @@
 %each step.
 
 
-%% Run the config file:
-engineConfig_Initial_2018
 
-clear all;
-clc;
-close all;
 %% import configuration parameters
 
-load inputs.mat
-load constants.mat
-load targets.mat
-load configfile.mat
+clearvars;
+
+load universalConstants.mat
+load rocketDesignParams.mat
+load InitialConfigVars.mat
+load regRateParams.mat
+
+load rocketConfig.mat
+
 
 % No initial diameter needed - uses port parameters, instead
 
@@ -37,13 +37,10 @@ PortParameters_store = PortParameters;
 
 %% peform simulation
 
-deltaT=0.01; %[s] timestep
 qburnfin = 0; %parameter that determines whether the burn is completed or not (0 when not completed, 1 when completed)
 
 t=0;
 ti=1; %time index
-
-P_cc(1) = 25*bar;
 
 %%
 
@@ -89,7 +86,7 @@ while qburnfin == 0
     % 4. determine thermochemistry
     clear val
     if ti==1
-        val(1) = 25*bar;
+        val(1) = P_cc(1);
     else
         val(1) = P_cc(ti-1); %[Pa] initial assumption of combustion chamber pressure
     end
@@ -162,95 +159,25 @@ end
 PortParameters_store = PortParameters_store(1:end-1, :);
 
 %%
-I_total_result = sum(F)*deltaT
+I_total_result = sum(F)*deltaT;
 
 t_burn_result = t;
 
-t_axis = 0:deltaT:t_burn_result;
+F_init_result  = F(1);
 
-F_init_result  = F(1)
+F_avg_result  = mean(F);
 
-Isp_avg = mean(Isp)
+Isp_avg = mean(Isp);
 
-m_f_total = sum(mdot_fuel)*deltaT
+m_f_total = sum(mdot_fuel)*deltaT;
 
-m_ox_total = sum(mdot_ox)*deltaT;
+m_ox_total = mdot_ox*t_burn_result;
 
-m_prop_total = sum(mdot_prop)*deltaT
+m_prop_total = sum(mdot_prop)*deltaT;
 
-save sim_results.mat I_total_result F_init_result
+save sim_results.mat I_total_result t_burn_result F_avg_result F_init_result Isp_avg m_f_total m_ox_total m_prop_total
 
-%% plot results
 
-qplot = 1;
-
-if qplot == 1
-    
-    figure(1);
-    clf
-    
-    subplot(3,4,1)
-    plot(t_axis,F,[0],[0])
-    title('F')
-    
-    subplot(3,4,2)
-    plot(t_axis,c_star,[0],[0])
-    title('c star')
-    
-    
-    subplot(3,4,3)
-    plot(t_axis,PortParameters_store(:, 2),[0],[0])
-    
-    title('Fuel web thickness [m]')
-    
-    subplot(3,4,4)
-    plot(t_axis,G_ox,[0],[0])
-    title('G ox')
-    
-    subplot(3,4,5)
-    plot(t_axis,G_fuel,[0],[0])
-    title('G fuel')
-    
-    subplot(3,4,6)
-    plot(t_axis,G_prop,[0],[0])
-    title('G prop')
-    
-    subplot(3,4,7)
-    plot(t_axis,mdot_fuel,[0],[0])
-    title('mdot fuel')
-    
-    subplot(3,4,8)
-    plot(t_axis,Isp,[0],[0])
-    title('Isp')
-    
-    subplot(3,4,9)
-    plot(t_axis,M_exit,[0],[0])
-    title('M exit')
-    
-    subplot(3,4,10)
-    plot(t_axis,OF,[0],[0])
-    title('OF')
-    
-    subplot(3,4,11)
-    plot(t_axis,P_cc,[0],[0])
-    title('P cc')
-    
-    subplot(3,4,12)
-    plot(t_axis,P_exit,[0],[0])
-    title('P exit')
-    
-    % Plot cross sections, before and after
-    figure (2);
-    clf
-    
-    subplot(1, 2, 1);
-    plotCrossSection(porttype, PortParameters_store(1, :));
-    title('Intial cross section [m]')
-    
-    subplot(1, 2, 2);
-    plotCrossSection(porttype, PortParameters_store(end, :));
-    title('Final cross section [m]')
-end
 
 
 

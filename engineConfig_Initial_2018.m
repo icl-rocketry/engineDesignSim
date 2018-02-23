@@ -1,7 +1,3 @@
-clear all;
-clc;
-close all;
-
 %% Version 2
 % Last edited by Dev & Will on Feb 13 2018 2030
 
@@ -21,6 +17,8 @@ close all;
 
 %%% A small doc should be written to clarify this process.
 %% load required variables
+
+clearvars;
 
 load universalConstants.mat
 load rocketDesignParams.mat
@@ -94,9 +92,9 @@ P_tank = P_vap; %given, "nitrous" (?) [see engine_config_v6
 
 dP_inj = 0.15*P_cc; %must be high enough to isolate feed system from pressure transients in the CC [SPAD Page 232]
 A_inj = mdot_propinit*sqrt(K_inj/(2*rho_fuel*dP_inj));
-d_inj = 2*sqrt(A_inj/pi) %diamter of 1 injector hole
+d_inj = 2*sqrt(A_inj/pi); %diamter of 1 injector hole
 drill_lim_inj = 0.5e-3; %[m] limit of hole diameter for injector
-holenum_inj = d_inj/drill_lim_inj
+holenum_inj = d_inj/drill_lim_inj;
 %A_valve = 0.02; %standin valu
 
 %A_inj = (mdot_oxinit^2/(2*rho_ox*Cdis_inj^2))*(P_tank - P_cc - (mdot_oxinit/(Cdis_valve*A_valve))^2*(1/(2*rho_ox)))^(-1); % WRONG FIX IT    Design output for area of injector orifices
@@ -171,9 +169,7 @@ A_throat = mdot_propinit*sqrt(gamma*R*T_flame)*((gamma+1)/2)^((gamma+1)/(2*gamma
 %%% then solve for Me
 
 syms Me;
-Me_tmp=vpasolve(mdot_propinit*Me*sqrt(gamma*R*T_flame/(1+(gamma-1)/2*Me^2)) == F_init, Me, 3); %temporarily store mach exit
-
-M_exit_target = double(Me_tmp);
+M_exit_target=double(vpasolve(mdot_propinit*Me*sqrt(gamma*R*T_flame/(1+(gamma-1)/2*Me^2)) == F_init, Me, 3)); %solve for required exit mach for desired thrust
 
 [~, ~, ~, ~, expansionRatio] = flowisentropic(gamma, M_exit_target,'mach'); %this is a function in the matlab aerospace toolbox
 
@@ -181,35 +177,33 @@ A_exit = expansionRatio*A_throat;
 
 
 %% key outputs:
-r
+r;
 
-c_star
+c_star;
 
-m_f
+m_f;
 
-m_ox
+m_ox;
 
-mdot_fuelinit
+mdot_fuelinit;
 
-mdot_oxinit
+mdot_oxinit;
 
-PortParameters
+PortParameters;
 
-Lp
+Lp;
 
-
-A_inj
+A_inj;
 
 %%
-plotCrossSection(porttype,PortParameters);
+%useful line for debugging
+%plotCrossSection(porttype,PortParameters);
 
 %% export configuration file (used in simulation code)
 
-save constants.mat g0 bar rho_fuel a n m etac T_req Cdis_inj Cdis_valve  GO_init lambda P_amb
-save targets.mat I_total F_init %t_burn
-save configfile.mat Lp porttype PortParameters mdot_oxinit A_throat A_exit m_f m_ox
+save rocketConfig.mat Lp PortParameters  A_throat A_exit  mdot_oxinit m_f m_ox
 
-save inputs.mat  OF Isp_init  P_cc %A_valve
+
 %% References:
 
 %%% [SPAD]: Space Propulsion Analysis and Design (Humble, book)
