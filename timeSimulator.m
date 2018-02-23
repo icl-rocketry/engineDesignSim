@@ -13,10 +13,6 @@
 %the line above hides the error message on vector lenth increasing with
 %each step.
 
-%% TODOS:
-% - Change the area equations in order to take into account different areas
-% -- Involves changing things to functions of thickness
-% -- Lines involving 33, 57, 65, 71, 73, 137, 162, 201
 
 %% Run the config file:
 engineConfig_Initial_2018
@@ -191,6 +187,7 @@ qplot = 1;
 if qplot == 1
     
     figure(1);
+    clf
     
     subplot(3,4,1)
     plot(t_axis,F,[0],[0])
@@ -243,12 +240,16 @@ if qplot == 1
     title('P exit')
     
     % Plot cross sections, before and after
-    figure;
+    figure (2);
+    clf
+    
     subplot(1, 2, 1);
     plotCrossSection(porttype, PortParameters_store(1, :));
+    title('Intial cross section [m]')
     
     subplot(1, 2, 2);
     plotCrossSection(porttype, PortParameters_store(end, :));
+    title('Final cross section [m]')
 end
 
 
