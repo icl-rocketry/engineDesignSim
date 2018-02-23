@@ -20,34 +20,19 @@ close all;
 %%% and continues to do this until the target performance is reached.
 
 %%% A small doc should be written to clarify this process.
-%% Constants
-g0 = 9.81; %[m/s^2]
-bar = 100000; %[Pa]
+%% load required variables
 
-lambda = 1;     %nozzle thrust efficiency factor
-P_amb = 1*bar;  %[Pa] ambient pressure;
+load universalConstants.mat
+load rocketDesignParams.mat
+load InitialConfigVars.mat
+load regRateParams.mat
 
-P_cc = 25*bar; %Chosen based on limits of tank pressurisation, and recommendations of [Physics of nitrous oxide, Aspire Space] in the drive
-
-% define port type
-porttype = 2;
-
-
-%% Target Performance
-
-I_total = 0.55*6000; %[Ns] Input goal total impulse, choose considering Adam Baker's Tank
-F_init = 0.85*600; %[N] Input Goal average thrust
-t_burn = I_total/F_init; %[s] total burn time in seconds
-
-
+if porttype == 2
+    load dportInitialGuesses.mat
+end
 
 %% Choose a OF, Then Mass and mass flows
 
-OF = 3; %oxidiser to fuel ratio (guess, but should be determined to maximise average Isp)
-
-Isp_init=200; %initial guess, should be iteratively maximised
-Isp_avg = 0.98*Isp_init; %[SPAD 7.4.4] Says that the average Isp should be ~2.0%lower than initial
-% Isp = I0/mprop*g0
 m_prop = I_total/(Isp_avg*g0); %[kg] RPE Ch.2
 m_ox = m_prop*OF/(OF+1);
 m_f = m_prop - m_ox;
@@ -67,10 +52,10 @@ m_f = m_prop - m_ox;
 %   (2) Isp
 %   (3) target thrust
 
-T_req = 5; %[degrees C] Input for 'nitrous;' function: temperature of ox tank contents
+
 [P_vap, rho_ox, dens_vap] = nitrous(T_req);
-rho_fuel=953; %density of fuel (kg/m^3), guess, should be determined more accurately
-P_vap = P_vap*bar;
+
+P_vap = P_vap*bar; %convert to Pascals
 
 mdot_propinit = F_init/(Isp_init*g0);    %initial mass flow rate (SPAD eq 7.79)
 mdot_fuelinit = mdot_propinit/(1+OF); %[SPAD, eq 7.79]
@@ -79,7 +64,6 @@ mdot_oxinit = mdot_propinit-mdot_fuelinit; %[SPAD, eq 7.79]
 
 %% Determine C* Cstar [PROPEP?]
 
-etac = 0.95; %combustion efficiency [SPAD]
 
 %This function calculates the values below.
 [T_flame, gamma, m_mol, R,c_star] = thermochem(OF,P_cc,etac);
@@ -121,7 +105,7 @@ holenum_inj = d_inj/drill_lim_inj
 %% configure combustion port
 %assume single cylindrical port
 
-GO_init = 350; %[kg/(m^2*s)]initial oxidiser flow flux [SPAD says blow-off/flooding limit is usually at 350-700 kg/m^2 s, so we used 350 to be safe]
+GO_init = GO_max; %[kg/(m^2*s)] initial oxidiser flow flux [SPAD says blow-off/flooding limit is usually at 350-700 kg/m^2 s, so we used 350 to be safe]
 
 A_port = mdot_oxinit/GO_init; %[m^2] [SPAD, eq. 7.82]
 
@@ -131,9 +115,8 @@ switch porttype
         Perimeter_port = pi*Diameter_port_init;
         
     case 2
-        D_outer = 80e-3; %[m]
-        tau = 2e-3; %[m] central metal half-thickness
-        fuelweb_initialguess = 10e-3;%[m] initial guess -> use this to control output
+        %need to solve for fuel web, we have assumed values for D_outer and
+        %for tau in dportInitialGuesses.mat
         
         fun = @(fuelweb) (DPort(D_outer,fuelweb,tau)-A_port);
         fuelweb_initial=fzero(fun, fuelweb_initialguess); %outputs the required fuelweb thickness
@@ -151,14 +134,10 @@ end
 GF_init = GO_init/OF; %initial fuel flow flux [SPAD, eq 7.83]
 
 %regression rate formula takes form of:
-% r= a G^n L^m where
-a=2.34e-5; %need correct values! Using Paraffin/GOX value from [ref 2, Table 1] - gives rdot in m/sec but uses SI units for
-n=0.8; %need correct values!
-m=-0.2; %need correct values!
+% r= a G^n L^m where the coefficients are defined in regRateParams.mat
 
-Lp = (mdot_fuelinit/(rho_fuel*a*(GO_init+GF_init)^n*Perimeter_port))^(1/(m+1));
+Lp = (mdot_fuelinit/(rho_fuel*a*(GO_init+GF_init)^n*Perimeter_port))^(1/(m+1)); %length of port (m) [SPAD, eq 7.88]
 
-%Lp = (((mdot_fuelinit*(pi^(n-1)))/(a*((4*mdot_propinit)^n)*rho_fuel))*((Diameter_port_init)^(2*n-1)))^(1/(m+1));%length of port (m) [SPAD, eq 7.91]
 
 if porttype ==1
     %only for circular:
@@ -169,7 +148,7 @@ if porttype ==1
     PortParameters = [Diameter_port_fin,fuelweb];
 end
 
-r = a*((GO_init+GF_init)^n)*(Lp^m);
+r = a*((GO_init+GF_init)^n)*(Lp^m); %calculate reg rate for reference
 
 
 
@@ -223,7 +202,6 @@ A_inj
 
 %%
 plotCrossSection(porttype,PortParameters);
-
 
 %% export configuration file (used in simulation code)
 
