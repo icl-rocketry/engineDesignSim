@@ -24,12 +24,12 @@ porttype = 1;
 %1 is for cylinder
 %2 is for D port
 
-I_total = 0.55*6000;      %[Ns] Input goal total impulse, choose considering Adam Baker's Tank
-F_init  = 0.85*600;       %[N] Input Goal average thrust
+I_total = 0.85*6000;      %[Ns] Input goal total impulse, choose considering Adam Baker's Tank
+F_init  = 500;       %[N] Input Goal average thrust
 t_burn  = I_total/F_init; %[s] total burn time in seconds
 
-P_cc     = 25*bar; %Chosen based on limits of tank pressurisation, and recommendations of [Physics of nitrous oxide, Aspire Space] in the drive
-lambda   = 0.9;      %nozzle thrust efficiency factor
+P_cc     = 30*bar; %Chosen based on limits of tank pressurisation, and recommendations of [Physics of nitrous oxide, Aspire Space] in the drive
+lambda   = 0.85;      %nozzle thrust efficiency factor
 rho_fuel = 953;    %density of fuel (kg/m^3), guess, should be determined more accurately
 etac     = 0.95;   %combustion efficiency [SPAD]
 GO_max   = 350;    %[kg/(m^2*s)] max oxidiser flow flux [SPAD says blow-off/flooding limit is usually at 350-700 kg/m^2 s, so we used 350 to be safe]
@@ -43,8 +43,8 @@ save rocketDesignParams.mat porttype I_total F_init t_burn P_cc lambda rho_fuel 
 
 
 %Initial guesses (as defined for initialConfig)
-OF       = 3;   %intial oxidiser to fuel ratio (guess used for config)
-T_req    = 5;   %[degrees C] Input for 'nitrous;' function: temperature of ox tank contents
+OF       = 7;   %intial oxidiser to fuel ratio (guess used for config)
+T_req    = 25;   %[degrees C] Input for 'nitrous;' function: temperature of ox tank contents
 Isp_init = 200; %initial guess, should be iterated to maximise overall average Isp
 Isp_avg  = 0.98*Isp_init;   %[SPAD 7.4.4] Says that the average Isp should be ~2.0% lower than initial
 
@@ -65,6 +65,14 @@ save InitialConfigVars.mat  OF Isp_init Isp_avg T_req
 a = 2.34e-5;  %need correct values! Using Paraffin/GOX value from [ref 2, Table 1] - gives rdot in m/sec but uses SI units for
 n = 0.8;      %need correct values!
 m = -0.2;     %need correct values!
+
+%using numbers from adam bakers excel file.
+a = 0.0000236;
+n = 0.605;
+m = 0;
+
+
+
 
 save regRateParams.mat a n m
 
