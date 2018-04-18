@@ -17,12 +17,6 @@ bar     = 100000;       %[Pa]
 P_amb   = 1.0135*bar;   %[Pa] ambient pressure;
 
 save universalConstants.mat g0 bar P_amb
-%% loop sizes
-F_init_range = 100:200:1000;
-I_total_range = 1000:1000:6000;
-
-FLoopID = 5;
-ITLoopID = 6;
 
 
 %Rocket Design Parameters and targets
@@ -30,11 +24,8 @@ porttype = 1;
 %1 is for cylinder
 %2 is for D port
 
-%I_total = I_total_range(ITLoopID);      %[Ns] Input goal total impulse, choose considering Adam Baker's Tank
-%F_init  = F_init_range(FLoopID);       %[N] Input Goal average thrust
-
-I_total=1500;
-F_init=200;
+I_total = 2000;      %[Ns] Input goal total impulse, choose considering Adam Baker's Tank
+F_init  = 500;       %[N] Input Goal average thrust
 t_burn  = I_total/F_init; %[s] total burn time in seconds
 
 P_cc     = 30*bar; %Chosen based on limits of tank pressurisation, and recommendations of [Physics of nitrous oxide, Aspire Space] in the drive
@@ -86,7 +77,7 @@ m = 0;
 save regRateParams.mat a n m
 
 %outputConditions
-qplot = 0; %if 1, there will be an output displayed
+qplot = 1; %if 1, there will be an output displayed
 qdisp = 1; %if 1, there will be an output displayed
 save outputConditions.mat qplot qdisp
 
@@ -119,7 +110,14 @@ disp('Simulation Successful')
 
 if qdisp == 1
     disp('All values are in SI units')
-    [I_total_result,t_burn_result,F_avg_result,Isp_avg,m_f_total,m_ox_total,Lp,Dia_store(1),Dia_store(end)]
+    I_total_result
+    t_burn_result
+    F_init_result
+    F_avg_result
+    Isp_avg
+    m_f_total
+    m_ox_total
+    m_prop_total
 end
 if qplot == 1
     

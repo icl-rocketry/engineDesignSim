@@ -1,4 +1,8 @@
-clear all; %close all; clc;
+function [I_total_result, t_burn_result,F_avg_result,Isp_avg, m_f_total, m_ox_total, Lp,Dia_init,Dia_end] = makeArocketLoop( I_total, F_init)
+%UNTITLED Summary of this function goes here
+%   Detailed explanation goes here
+
+%clearvars; %close all; clc;
 
 %%% This script defines the parameters that need to be defined and then
 %%% runs all necessary subscripts to be able to output and plot the
@@ -17,24 +21,16 @@ bar     = 100000;       %[Pa]
 P_amb   = 1.0135*bar;   %[Pa] ambient pressure;
 
 save universalConstants.mat g0 bar P_amb
-%% loop sizes
-F_init_range = 100:200:1000;
-I_total_range = 1000:1000:6000;
 
-FLoopID = 5;
-ITLoopID = 6;
-
+%%
 
 %Rocket Design Parameters and targets
 porttype = 1;
 %1 is for cylinder
 %2 is for D port
 
-%I_total = I_total_range(ITLoopID);      %[Ns] Input goal total impulse, choose considering Adam Baker's Tank
-%F_init  = F_init_range(FLoopID);       %[N] Input Goal average thrust
-
-I_total=1500;
-F_init=200;
+%I_total = 1250;      %[Ns] Input goal total impulse, choose considering Adam Baker's Tank
+%F_init  = 200;       %[N] Input Goal average thrust
 t_burn  = I_total/F_init; %[s] total burn time in seconds
 
 P_cc     = 30*bar; %Chosen based on limits of tank pressurisation, and recommendations of [Physics of nitrous oxide, Aspire Space] in the drive
@@ -118,76 +114,23 @@ clc;
 disp('Simulation Successful')
 
 if qdisp == 1
+    
+    load storedvals
+    
     disp('All values are in SI units')
-    [I_total_result,t_burn_result,F_avg_result,Isp_avg,m_f_total,m_ox_total,Lp,Dia_store(1),Dia_store(end)]
-end
-if qplot == 1
-    
-    t_axis = 0:deltaT:t_burn_result;
-    
-    figure(1);
-    
-    
-    subplot(3,4,1)
-    plot(t_axis,F,[0],[0])
-    title('F')
-    
-    subplot(3,4,2)
-    plot(t_axis,c_star,[0],[0])
-    title('c star')
+    I_total_result
+    t_burn_result
+    %F_init_result
+    F_avg_result
+    Isp_avg
+    m_f_total
+    m_ox_total
+    %m_prop_total
+    Lp
+    dia_init=Dia_store(1);
+    dia_end=Dia_store(end);
     
     
-    subplot(3,4,3)
-    plot(t_axis,PortParameters_store(:, 2),[0],[0])
-    
-    title('Fuel web thickness [m]')
-    
-    subplot(3,4,4)
-    plot(t_axis,G_ox,[0],[0])
-    title('G ox')
-    
-    subplot(3,4,5)
-    plot(t_axis,G_fuel,[0],[0])
-    title('G fuel')
-    
-    subplot(3,4,6)
-    plot(t_axis,G_prop,[0],[0])
-    title('G prop')
-    
-    subplot(3,4,7)
-    plot(t_axis,mdot_fuel,[0],[0])
-    title('mdot fuel')
-    
-    subplot(3,4,8)
-    plot(t_axis,Isp,[0],[0])
-    title('Isp')
-    
-    subplot(3,4,9)
-    plot(t_axis,M_exit,[0],[0])
-    title('M exit')
-    
-    subplot(3,4,10)
-    plot(t_axis,OF,[0],[0])
-    title('OF')
-    
-    subplot(3,4,11)
-    plot(t_axis,P_cc,[0],[0])
-    title('P cc')
-    
-    subplot(3,4,12)
-    plot(t_axis,P_exit,[0],[0])
-    title('P exit')
-    
-    % Plot cross sections, before and after
-    figure (2);
-    clf
-    
-    subplot(1, 2, 1);
-    plotCrossSection(porttype, PortParameters_store(1, :));
-    title('Intial cross section [m]')
-    
-    subplot(1, 2, 2);
-    plotCrossSection(porttype, PortParameters_store(end, :));
-    title('Final cross section [m]')
 end
 
+    end

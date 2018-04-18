@@ -160,7 +160,9 @@ r = a*((GO_init+GF_init)^n)*(Lp^m); %calculate reg rate for reference
 %Since the combustion chamber diameter (dport final) and pressure is known,
 %we can determine the throat area required to choke the flow.
 
-A_throat = mdot_propinit*sqrt(gamma*R*T_flame)*((gamma+1)/2)^((gamma+1)/(2*gamma-2))/(P_cc*gamma);
+A_throat = mdot_propinit*0.92*sqrt(gamma*R*T_flame)*((gamma+1)/2)^((gamma+1)/(2*gamma-2))/(P_cc*gamma);
+
+%0.92 is combustion efficiency
 
 %note for above: used the T_flame as total temperature of flow which is
 %probably inaccurate.

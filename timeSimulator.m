@@ -64,6 +64,7 @@ while qburnfin == 0
         S(ti) = P_port*Lp;
         
         rdot(ti) = a*G_prop(ti)^n*Lp^m;
+        %rdot(ti) = a*G_ox(ti)^n*Lp^m;
         
         mdot_fuel(ti) = rdot(ti)*rho_fuel*S(ti);
         
@@ -148,11 +149,18 @@ while qburnfin == 0
     % (2) Choked flow
     % (3) fuel is not entirely eaten up
     
-    if PortParameters_store(end, 2)<=0 %using only condition 3 for now
+    if mdot_ox*t > 0.6 %oxidiser used up
         qburnfin=1;
     else
-        qburnfin=0;
+        if PortParameters_store(end, 2)<=0 %using only condition 3 for now
+            qburnfin=1;
+        else
+            qburnfin=0;
+        end
     end
+        
+    
+    
     
 end
 
