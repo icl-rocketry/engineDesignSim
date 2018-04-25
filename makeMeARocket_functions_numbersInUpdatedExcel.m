@@ -1,6 +1,6 @@
 %% make me a rocket with functions and structures
 
-clear all; close all;
+clear all; close all; clc;
 
 %%
 
@@ -25,8 +25,8 @@ if rocketDesignParameters.port.type=="Dport"
 end
 
 
-rocketDesignParameters.I_total=1500;
-rocketDesignParameters.F_init=200;
+rocketDesignParameters.I_total=1200;
+rocketDesignParameters.F_init=180;
 rocketDesignParameters.t_burn  = rocketDesignParameters.I_total/rocketDesignParameters.F_init; %[s] total burn time in seconds
 
 rocketDesignParameters.P_cc     = 30*bar; %Chosen based on limits of tank pressurisation, and recommendations of [Physics of nitrous oxide, Aspire Space] in the drive
@@ -38,7 +38,7 @@ rocketDesignParameters.GO_max   = 350;    %[kg/(m^2*s)] max oxidiser flow flux [
 
 %InitialConfigVars
 
-InitialConfigVars.OF       = 7;   %intial oxidiser to fuel ratio (guess used for config)
+InitialConfigVars.OF       = 10;   %intial oxidiser to fuel ratio (guess used for config)
 InitialConfigVars.T_req    = 25;   %[degrees C] Input for 'nitrous;' function: temperature of ox tank contents
 InitialConfigVars.Isp_init = 200; %initial guess, should be iterated to maximise overall average Isp
 InitialConfigVars.Isp_avg  = 0.98*InitialConfigVars.Isp_init;   %[SPAD 7.4.4] Says that the average Isp should be ~2.0% lower than initial
@@ -62,13 +62,30 @@ qdisp = 1; %if 1, there will be an output displayed
 
 rocketDesign = intialConfig(universalConstants, rocketDesignParameters, InitialConfigVars, regRateParams);
 
+%% multiply fuel web by k times
+
+fuelwebFactorK=3;
+
+%update fuel web
+rocketDesign.port.InitialFuelWeb = rocketDesign.port.InitialFuelWeb*fuelwebFactorK;
+
+%update outer diameter
+switch rocketDesign.port.type
+    case "circ"
+        rocketDesign.port.FinalDiameter = rocketDesign.port.IntialDiameter+2*rocketDesign.port.InitialFuelWeb;
+        
+    case "Dport"
+        error('NEED TO FIX THIS PART OF THE CODE')
+        
+end
+
 
 %% run time based simulation
 
 thresh=1e-6;
 deltaT = 0.01;
 
-[rocketPerformance, rocketSim] = timeBasedSimulator(universalConstants,rocketDesign,rocketDesignParameters,regRateParams, deltaT,thresh)
+[rocketPerformance, rocketSim] = timeBasedSimulator(universalConstants,rocketDesign,regRateParams, deltaT,thresh);
 
 
 %% display results
@@ -78,6 +95,7 @@ disp('Simulation Successful')
 if qdisp == 1
     disp('All values are in SI units')
     rocketPerformance
+    avgRegRate=(rocketSim.port.fuelweb(1)-rocketSim.port.fuelweb(end))/
 end
 
 
@@ -150,12 +168,9 @@ if qplot == 1
     title('Intial cross section [m]')
     
     subplot(1, 2, 2);
-    plotPortXSection(RocketSim.port,'end')
+    plotPortXSection(rocketSim.port,length(t_axis))
     title('Final cross section [m]')
 end
-
-
-
 
 
 

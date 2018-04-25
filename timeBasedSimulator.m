@@ -1,4 +1,4 @@
-function [rocketPerformance, rocketSim] = timeBasedSimulator(universalConstants,rocketDesign,rocketDesignParameters,regRateParams, deltaT,thresh)
+function [rocketPerformance, rocketSim] = timeBasedSimulator(universalConstants,rocketDesign,regRateParams, deltaT,thresh)
 
 
 %% extract variables
@@ -12,13 +12,13 @@ a = regRateParams.a;
 n = regRateParams.n;
 m = regRateParams.m;
 
-etac = rocketDesignParameters.etac;
-lambda = rocketDesignParameters.lambda;
+etac = rocketDesign.etac;
+lambda = rocketDesign.lambda;
 
 Lp = rocketDesign.Lp;
-rho_fuel = rocketDesignParameters.rho_fuel;
+rho_fuel = rocketDesign.rho_fuel;
 
-P_cc=rocketDesignParameters.P_cc;
+P_cc=rocketDesign.P_cc;
 
 mdot_oxinit = rocketDesign.mdot_oxinit;
 mdot_ox = mdot_oxinit; %assumed constant throughout burn
@@ -67,7 +67,7 @@ while qburnfin == 0
         S(ti) = P_port*Lp;
         
         rdot(ti) = a*G_prop(ti)^n*Lp^m;
-        %rdot(ti) = a*G_ox(ti)^n*Lp^m;
+        
         
         mdot_fuel(ti) = rdot(ti)*rho_fuel*S(ti);
         
@@ -152,9 +152,11 @@ while qburnfin == 0
     
     if mdot_ox*t > 0.6 %oxidiser used up
         qburnfin=1;
+        disp('Ox used up');
     else
         if rocketSim.port.fuelweb(end)<=0 %using only condition 3 for now
             qburnfin=1;
+            disp('Fuel Web used up')
         else
             qburnfin=0;
         end

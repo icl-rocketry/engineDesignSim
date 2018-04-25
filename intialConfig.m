@@ -228,6 +228,15 @@ rocketDesign.A_exit = A_exit;
 rocketDesign.expansionRatio=expansionRatio;
 
 
+%other design inputs that need to be carried over to rocketDesign
+rocketDesign.etac = rocketDesignParameters.etac;
+
+rocketDesign.lambda = rocketDesignParameters.lambda;
+
+rocketDesign.rho_fuel = rocketDesignParameters.rho_fuel;
+
+rocketDesign.P_cc=rocketDesignParameters.P_cc;
+
 %%
 %useful line for debugging
 %plotCrossSection(porttype,PortParameters);

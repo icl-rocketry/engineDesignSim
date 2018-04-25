@@ -1,6 +1,6 @@
 %% make me a rocket with functions and structures
 
-clear all; close all;
+clear all; close all; clc;
 
 %%
 
@@ -68,7 +68,7 @@ rocketDesign = intialConfig(universalConstants, rocketDesignParameters, InitialC
 thresh=1e-6;
 deltaT = 0.01;
 
-[rocketPerformance, rocketSim] = timeBasedSimulator(universalConstants,rocketDesign,rocketDesignParameters,regRateParams, deltaT,thresh)
+[rocketPerformance, rocketSim] = timeBasedSimulator(universalConstants,rocketDesign,regRateParams, deltaT,thresh);
 
 
 %% display results
