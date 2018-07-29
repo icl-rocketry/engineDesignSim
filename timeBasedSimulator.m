@@ -56,7 +56,7 @@ while qburnfin == 0
     % Calculating area, perimeter of current port diameter
     [A_port, P_port] = portCalculator(rocketSim.port);
     
-    G_ox(ti) = 4*mdot_ox/(A_port);
+    G_ox(ti) = mdot_ox/(A_port);
     
     G_prop(ti) = G_ox(ti); %as a starting point
     

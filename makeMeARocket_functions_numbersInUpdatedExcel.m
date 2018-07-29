@@ -38,7 +38,7 @@ rocketDesignParameters.GO_max   = 350;    %[kg/(m^2*s)] max oxidiser flow flux [
 
 %InitialConfigVars
 
-InitialConfigVars.OF       = 10;   %intial oxidiser to fuel ratio (guess used for config)
+InitialConfigVars.OF       = 7;   %intial oxidiser to fuel ratio (guess used for config)
 InitialConfigVars.T_req    = 25;   %[degrees C] Input for 'nitrous;' function: temperature of ox tank contents
 InitialConfigVars.Isp_init = 200; %initial guess, should be iterated to maximise overall average Isp
 InitialConfigVars.Isp_avg  = 0.98*InitialConfigVars.Isp_init;   %[SPAD 7.4.4] Says that the average Isp should be ~2.0% lower than initial
@@ -94,8 +94,9 @@ disp('Simulation Successful')
 
 if qdisp == 1
     disp('All values are in SI units')
+    rocketDesign
     rocketPerformance
-    avgRegRate=(rocketSim.port.fuelweb(1)-rocketSim.port.fuelweb(end))/
+    avgRegRate_in_mm_per_s=1000*(rocketSim.port.fuelweb(1)-rocketSim.port.fuelweb(end))/rocketPerformance.t_burn_result
 end
 
 
