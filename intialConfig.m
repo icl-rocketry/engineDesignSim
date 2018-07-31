@@ -1,33 +1,46 @@
-%% Version 2
-% Last edited by Dev & Will on Feb 13 2018 2030
+function rocketDesign = intialConfig(universalConstants, rocketDesignParameters, InitialConfigVars, regRateParams)
 
-%%% This script aims to configure the rocket using Chapter 7 of Space
-%%% Propulsion Analysis and Design (SPAD)
-%%% Rocket Propulsion Elements (RPE)
 
-%%% in addition, a script is developed to be able to automatically vary the
-%%% inputs to be able to move the configuration towards the target
-%%% performance
+%% extract variables so we can use them easily
 
-%%% This script is run first to create the first design point - the targets
-%%% and constants are defined here. Next the iteration script is run which
-%%% calculates a local Jacobian, and solves for the required change in
-%%% inputs that will cause the system to be perturbed towards the target,
-%%% and continues to do this until the target performance is reached.
+%Universal Constants
+g0    = universalConstants.g0;
+bar   = universalConstants.bar;
+P_amb = universalConstants.P_amb;
 
-%%% A small doc should be written to clarify this process.
-%% load required variables
+%rocketDesignParameters
 
-clearvars;
-
-load universalConstants.mat
-load rocketDesignParams.mat
-load InitialConfigVars.mat
-load regRateParams.mat
-
-if porttype == 2
-    load dportInitialGuesses.mat
+if rocketDesignParameters.port.type=="Dport"
+    D_outer              = rocketDesignParameters.port.initialGuess.D_outer;
+    tau                  = rocketDesignParameters.port.initialGuess.tau;
+    fuelweb_initialguess = rocketDesignParameters.port.initialGuess.fuelweb_initialguess;
 end
+
+
+I_total= rocketDesignParameters.I_total;
+F_init = rocketDesignParameters.F_init;
+t_burn  = I_total/F_init;
+
+P_cc     = rocketDesignParameters.P_cc;
+lambda   = rocketDesignParameters.lambda;
+rho_fuel = rocketDesignParameters.rho_fuel;
+etac     = rocketDesignParameters.etac;
+GO_max   = rocketDesignParameters.GO_max;
+
+%InitialConfigVars
+OF       = InitialConfigVars.OF;
+T_req    = InitialConfigVars.T_req;
+Isp_init = InitialConfigVars.Isp_init;
+Isp_avg  = InitialConfigVars.Isp_avg;
+
+
+%regRate
+a = regRateParams.a;
+n = regRateParams.n;
+m = regRateParams.m;
+
+%% Start configuration
+
 
 %% Choose a OF, Then Mass and mass flows
 
@@ -58,7 +71,6 @@ P_vap = P_vap*bar; %convert to Pascals
 mdot_propinit = F_init/(Isp_init*g0);    %initial mass flow rate (SPAD eq 7.79)
 mdot_fuelinit = mdot_propinit/(1+OF); %[SPAD, eq 7.79]
 mdot_oxinit = mdot_propinit-mdot_fuelinit; %[SPAD, eq 7.79]
-
 
 %% Determine C* Cstar [PROPEP?]
 
@@ -100,6 +112,7 @@ holenum_inj = d_inj/drill_lim_inj;
 %A_inj = (mdot_oxinit^2/(2*rho_ox*Cdis_inj^2))*(P_tank - P_cc - (mdot_oxinit/(Cdis_valve*A_valve))^2*(1/(2*rho_ox)))^(-1); % WRONG FIX IT    Design output for area of injector orifices
 %dP_inj = ((mdot_oxinit/Cdis_inj*A_inj)^2)*1/(2*rho_ox); %required pressure drop over injector.
 
+
 %% configure combustion port
 %assume single cylindrical port
 
@@ -107,12 +120,18 @@ GO_init = GO_max; %[kg/(m^2*s)] initial oxidiser flow flux [SPAD says blow-off/f
 
 A_port = mdot_oxinit/GO_init; %[m^2] [SPAD, eq. 7.82]
 
-switch porttype
-    case 1
+rocketDesign.port.type = rocketDesignParameters.port.type;
+
+
+switch rocketDesignParameters.port.type
+    case "circ"
         Diameter_port_init = 2*sqrt(A_port/pi); %[m] initial port diameter
         Perimeter_port = pi*Diameter_port_init;
         
-    case 2
+        rocketDesign.port.IntialDiameter   = Diameter_port_init;
+        rocketDesign.port.InitialPerimeter = Perimeter_port;
+        
+    case "Dport"
         %need to solve for fuel web, we have assumed values for D_outer and
         %for tau in dportInitialGuesses.mat
         
@@ -125,6 +144,11 @@ switch porttype
         %should perform a human check of whether the numbers are reasonable.
         PortParameters = [D_outer,fuelweb_initial,tau]; %vector of port parameters
         [~,Perimeter_port] = DPort(D_outer,fuelweb_initial,tau);
+        
+        rocketDesign.port.D_outer = D_outer;
+        rocketDesign.port.InitialFuelWeb = fuelweb_initial;
+        rocketDesign.port.tau = tau;
+        rocketDesign.port.InitialPerimeter = Perimeter_port;
 end
 %Should perform a human check on the suitability of these numbers
 
@@ -137,13 +161,16 @@ GF_init = GO_init/OF; %initial fuel flow flux [SPAD, eq 7.83]
 Lp = (mdot_fuelinit/(rho_fuel*a*(GO_init+GF_init)^n*Perimeter_port))^(1/(m+1)); %length of port (m) [SPAD, eq 7.88]
 
 
-if porttype ==1
+if rocketDesignParameters.port.type == "circ"
     %only for circular:
     Diameter_port_fin = sqrt((4*m_f)/(pi*Lp*rho_fuel)+Diameter_port_init^2);   %final diameter of the port [SPAD, eq 7.95]
     
     fuelweb=(Diameter_port_fin-Diameter_port_init)/2; %thickness of fuel that gets burnt [SPAD, 7.96]
     
     PortParameters = [Diameter_port_fin,fuelweb];
+    
+    rocketDesign.port.FinalDiameter=Diameter_port_fin;
+    rocketDesign.port.InitialFuelWeb=fuelweb;
 end
 
 r = a*((GO_init+GF_init)^n)*(Lp^m); %calculate reg rate for reference
@@ -160,9 +187,8 @@ r = a*((GO_init+GF_init)^n)*(Lp^m); %calculate reg rate for reference
 %Since the combustion chamber diameter (dport final) and pressure is known,
 %we can determine the throat area required to choke the flow.
 
-A_throat = mdot_propinit*0.92*sqrt(gamma*R*T_flame)*((gamma+1)/2)^((gamma+1)/(2*gamma-2))/(P_cc*gamma);
+A_throat = mdot_propinit*etac*sqrt(gamma*R*T_flame)*((gamma+1)/2)^((gamma+1)/(2*gamma-2))/(P_cc*gamma);
 
-%0.92 is combustion efficiency
 
 %note for above: used the T_flame as total temperature of flow which is
 %probably inaccurate.
@@ -179,32 +205,41 @@ A_exit = expansionRatio*A_throat;
 
 
 %% key outputs:
-r;
+rocketDesign.intialRegRate=r;
 
-c_star;
+rocketDesign.c_star = c_star;
 
-m_f;
+rocketDesign.m_f = m_f;
 
-m_ox;
+rocketDesign.m_ox = m_ox;
 
-mdot_fuelinit;
+rocketDesign.mdot_fuelinit = mdot_fuelinit;
 
-mdot_oxinit;
+rocketDesign.mdot_oxinit = mdot_oxinit;
 
-PortParameters;
+rocketDesign.Lp = Lp;
 
-Lp;
+rocketDesign.A_inj = A_inj;
 
-A_inj;
+rocketDesign.A_throat = A_throat;
+
+rocketDesign.A_exit = A_exit;
+
+rocketDesign.expansionRatio=expansionRatio;
+
+
+%other design inputs that need to be carried over to rocketDesign
+rocketDesign.etac = rocketDesignParameters.etac;
+
+rocketDesign.lambda = rocketDesignParameters.lambda;
+
+rocketDesign.rho_fuel = rocketDesignParameters.rho_fuel;
+
+rocketDesign.P_cc=rocketDesignParameters.P_cc;
 
 %%
 %useful line for debugging
 %plotCrossSection(porttype,PortParameters);
-
-%% export configuration file (used in simulation code)
-
-save rocketConfig.mat Lp PortParameters  A_throat A_exit  mdot_oxinit m_f m_ox
-
 
 %% References:
 
@@ -213,3 +248,6 @@ save rocketConfig.mat Lp PortParameters  A_throat A_exit  mdot_oxinit m_f m_ox
 %%% EXPRESSIONS FOR HYBRID ROCKETS,  by M. Arif Karabeyoglu, Brian J.
 %%% Cantwell and Greg Zilliac (AIAA 2005-3544)
 
+
+
+end

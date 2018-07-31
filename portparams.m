@@ -1,4 +1,4 @@
-% 
+
 function [area, perimeter] = portparams(porttype, arguments)
 
 switch porttype

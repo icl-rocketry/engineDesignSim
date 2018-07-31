@@ -1,39 +1,44 @@
-%% Version 1
-% Last edited by Dev on Feb 10 2018
-
-%%% This script aims to perform a time-varying simulation of the rocket
-%%% burn to verify that performance matches expectations in the config file
-%%% using Chapter 7 of Space Propulsion Analysis and Design (SPAD) and
-%%% Rocket Propulsion Elements (RPE)
-
-%This script follows Table 7.9 in SPAD almost exactly.
-%It assumes a constant mdot_ox and circular port geometry
-
-%#ok<*SAGROW>
-%the line above hides the error message on vector lenth increasing with
-%each step.
+function [rocketPerformance, rocketSim] = timeBasedSimulator(universalConstants,rocketDesign,regRateParams, deltaT,thresh)
 
 
+%% extract variables
 
-%% import configuration parameters
+%universal constants
+g0    = universalConstants.g0;
+bar   = universalConstants.bar;
+P_amb = universalConstants.P_amb;
 
-clearvars;
+a = regRateParams.a;
+n = regRateParams.n;
+m = regRateParams.m;
 
-load universalConstants.mat
-load rocketDesignParams.mat
-load InitialConfigVars.mat
-load regRateParams.mat
+etac = rocketDesign.etac;
+lambda = rocketDesign.lambda;
 
-load rocketConfig.mat
+Lp = rocketDesign.Lp;
+rho_fuel = rocketDesign.rho_fuel;
+
+P_cc=rocketDesign.P_cc;
+
+mdot_oxinit = rocketDesign.mdot_oxinit;
+mdot_ox = mdot_oxinit; %assumed constant throughout burn
+
+A_exit = rocketDesign.A_exit;
+A_throat = rocketDesign.A_throat;
+expansionRatio = rocketDesign.expansionRatio;
+
+rocketSim.port=rocketDesign.port;
+
+if rocketSim.port.type == "circ"
+    rocketSim.port.diameter=rocketSim.port.IntialDiameter;
+    rocketSim.port.fuelweb = rocketSim.port.InitialFuelWeb;
+end
+
+if rocketSim.port.type == "Dport"
+    rocketSim.port.fuelweb = rocketSim.port.InitialFuelWeb;
+end
 
 
-% No initial diameter needed - uses port parameters, instead
-
-mdot_ox = mdot_oxinit; %at the moment I assume we can supply this much mass flow rate, although we should really be putting in the value that adam baker gives us.
-
-expansionRatio=A_exit/A_throat;
-
-PortParameters_store = PortParameters;
 
 %% peform simulation
 
@@ -42,18 +47,16 @@ qburnfin = 0; %parameter that determines whether the burn is completed or not (0
 t=0;
 ti=1; %time index
 
-%%
-
-thresh = 1e-6; % max percentage change before we move on.
 
 while qburnfin == 0
-    
+
+
     % 2. determine fuel regression rate & % 3. determine total mass flow rate
     
     % Calculating area, perimeter of current port diameter
-    [A_port, P_port] = portparams(porttype, PortParameters_store(ti, :));
+    [A_port, P_port] = portCalculator(rocketSim.port);
     
-    G_ox(ti) = 4*mdot_ox/(A_port);
+    G_ox(ti) = mdot_ox/(A_port);
     
     G_prop(ti) = G_ox(ti); %as a starting point
     
@@ -64,11 +67,10 @@ while qburnfin == 0
         S(ti) = P_port*Lp;
         
         rdot(ti) = a*G_prop(ti)^n*Lp^m;
-        %rdot(ti) = a*G_ox(ti)^n*Lp^m;
+        
         
         mdot_fuel(ti) = rdot(ti)*rho_fuel*S(ti);
         
-        G_ox(ti) = mdot_ox/(A_port);
         
         G_fuel(ti) = mdot_fuel(ti)./(A_port); %#ok<*SAGROW>
         
@@ -86,11 +88,8 @@ while qburnfin == 0
     
     % 4. determine thermochemistry
     clear val
-    if ti==1
-        val(1) = P_cc(1);
-    else
-        val(1) = P_cc(ti-1); %[Pa] initial assumption of combustion chamber pressure
-    end
+    
+    val(1) = P_cc(max([1,ti-1]));
     
     for loopind = 1:1000
         
@@ -129,11 +128,13 @@ while qburnfin == 0
     Isp(ti) = F(ti)/(mdot_prop(ti)*g0);
     
     % 6. update geometry
-      
-    PortParameters_store(ti+1, :) = PortParameters_store(ti, :);
-    
-    % Argument 2 is fuelweb
-    PortParameters_store(ti+1, 2) = PortParameters_store(ti, 2) - rdot(ti)*deltaT;
+    switch rocketSim.port.type
+        case "circ"
+            rocketSim.port.fuelweb(ti+1)=rocketSim.port.fuelweb(ti)-rdot(ti)*deltaT;
+            rocketSim.port.diameter(ti+1)=rocketSim.port.diameter(ti)+rdot(ti)*deltaT;
+        case "Dport"
+            rocketSim.port.fuelweb(ti+1)=rocketSim.port.fuelweb(ti)-rdot(ti)*deltaT;
+    end
            
     ti=ti+1;        %increment the time index
     t=t+deltaT;     %increment the time
@@ -151,9 +152,11 @@ while qburnfin == 0
     
     if mdot_ox*t > 0.6 %oxidiser used up
         qburnfin=1;
+        disp('Ox used up');
     else
-        if PortParameters_store(end, 2)<=0 %using only condition 3 for now
+        if rocketSim.port.fuelweb(end)<=0 %using only condition 3 for now
             qburnfin=1;
+            disp('Fuel Web used up')
         else
             qburnfin=0;
         end
@@ -164,28 +167,38 @@ while qburnfin == 0
     
 end
 
-PortParameters_store = PortParameters_store(1:end-1, :);
 
-%%
-I_total_result = sum(F)*deltaT;
+%% store results
 
-t_burn_result = t;
-
-F_init_result  = F(1);
-
-F_avg_result  = mean(F);
-
-Isp_avg = mean(Isp);
-
-m_f_total = sum(mdot_fuel)*deltaT;
-
-m_ox_total = mdot_ox*t_burn_result;
-
-m_prop_total = sum(mdot_prop)*deltaT;
-
-save sim_results.mat I_total_result t_burn_result F_avg_result F_init_result Isp_avg m_f_total m_ox_total m_prop_total
+rocketSim.F = F;
+rocketSim.Isp= Isp;
+rocketSim.mdot_fuel=mdot_fuel;
+rocketSim.mdot_prop=mdot_prop;
+rocketSim.c_star=c_star;
+rocketSim.G_ox=G_ox;
+rocketSim.G_fuel=G_fuel;
+rocketSim.G_prop= G_prop;
+rocketSim.M_exit=M_exit;
+rocketSim.OF = OF;
+rocketSim.P_cc = P_cc;
+rocketSim.P_exit=P_exit;
 
 
+rocketPerformance.I_total_result = sum(F)*deltaT;
+
+rocketPerformance.t_burn_result = t;
+
+rocketPerformance.F_init_result  = F(1);
+
+rocketPerformance.F_avg_result  = mean(F);
+
+rocketPerformance.Isp_avg = mean(Isp);
+
+rocketPerformance.m_f_total = sum(mdot_fuel)*deltaT;
+
+rocketPerformance.m_ox_total = mdot_ox*rocketPerformance.t_burn_result;
+
+rocketPerformance.m_prop_total = sum(mdot_prop)*deltaT;
 
 
 
@@ -195,4 +208,12 @@ save sim_results.mat I_total_result t_burn_result F_avg_result F_init_result Isp
 
 
 
+
+
+
+
+
+
+
+end
 
