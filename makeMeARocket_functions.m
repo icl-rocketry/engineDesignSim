@@ -61,6 +61,7 @@ deltaT = 0.01; %s
 qplot = 1; %if 1, there will be an output displayed
 qdisp = 1; %if 1, there will be an output displayed
 
+%% ****************** Now just hit run! ******************
 
 %% run initial config
 
