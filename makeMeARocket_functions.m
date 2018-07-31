@@ -53,6 +53,10 @@ regRateParams.a = 0.0000236;
 regRateParams.n = 0.605;
 regRateParams.m = 0;
 
+%time based simulator threshold and timestep
+thresh=1e-6; % in percentage - so 1e-2 is 1% change threshold.
+deltaT = 0.01; %s
+
 %outputConditions
 qplot = 1; %if 1, there will be an output displayed
 qdisp = 1; %if 1, there will be an output displayed
@@ -65,8 +69,6 @@ rocketDesign = intialConfig(universalConstants, rocketDesignParameters, InitialC
 
 %% run time based simulation
 
-thresh=1e-6;
-deltaT = 0.01;
 
 [rocketPerformance, rocketSim] = timeBasedSimulator(universalConstants,rocketDesign,regRateParams, deltaT,thresh);
 
