@@ -84,73 +84,62 @@ if qdisp == 1
 end
 
 
-
 if qplot == 1
     
     t_axis = 0:deltaT:rocketPerformance.t_burn_result;
     
     figure(1);
     
+    
     subplot(3,4,1)
     plot(t_axis,rocketSim.F,[0],[0])
     title('F')
-    grid on
     
     subplot(3,4,2)
     plot(t_axis,rocketSim.c_star,[0],[0])
     title('c star')
-    grid on
     
     
     subplot(3,4,3)
     plot(t_axis,rocketSim.port.fuelweb(1:end-1),[0],[0])
-    grid on
+    
     title('Fuel web thickness [m]')
     
     subplot(3,4,4)
     plot(t_axis,rocketSim.G_ox,[0],[0])
     title('G ox')
-    grid on
     
     subplot(3,4,5)
     plot(t_axis,rocketSim.G_fuel,[0],[0])
     title('G fuel')
-    grid on
     
     subplot(3,4,6)
     plot(t_axis,rocketSim.G_prop,[0],[0])
     title('G prop')
-    grid on
     
     subplot(3,4,7)
     plot(t_axis,rocketSim.mdot_fuel,[0],[0])
     title('mdot fuel')
-    grid on
     
     subplot(3,4,8)
     plot(t_axis,rocketSim.Isp,[0],[0])
     title('Isp')
-    grid on
     
     subplot(3,4,9)
     plot(t_axis,rocketSim.M_exit,[0],[0])
     title('M exit')
-    grid on
     
     subplot(3,4,10)
     plot(t_axis,rocketSim.OF,[0],[0])
     title('OF')
-    grid on
     
     subplot(3,4,11)
     plot(t_axis,rocketSim.P_cc,[0],[0])
     title('P cc')
-    grid on
     
     subplot(3,4,12)
     plot(t_axis,rocketSim.P_exit,[0],[0])
     title('P exit')
-    grid on
     
     %Plot cross sections, before and after
     figure (2);

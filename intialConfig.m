@@ -63,7 +63,6 @@ m_f = m_prop - m_ox;
 %   (2) Isp
 %   (3) target thrust
 
-
 [P_vap, rho_ox, dens_vap] = nitrous(T_req);
 
 P_vap = P_vap*bar; %convert to Pascals

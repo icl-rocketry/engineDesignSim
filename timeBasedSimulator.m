@@ -22,6 +22,7 @@ P_cc=rocketDesign.P_cc;
 
 mdot_oxinit = rocketDesign.mdot_oxinit;
 mdot_ox = mdot_oxinit; %assumed constant throughout burn
+m_ox = rocketDesign.m_ox;
 
 A_exit = rocketDesign.A_exit;
 A_throat = rocketDesign.A_throat;
@@ -135,6 +136,9 @@ while qburnfin == 0
         case "Dport"
             rocketSim.port.fuelweb(ti+1)=rocketSim.port.fuelweb(ti)-rdot(ti)*deltaT;
     end
+    
+    %throat erosion
+    
            
     ti=ti+1;        %increment the time index
     t=t+deltaT;     %increment the time
@@ -150,7 +154,7 @@ while qburnfin == 0
     % (2) Choked flow
     % (3) fuel is not entirely eaten up
     
-    if mdot_ox*t > 0.6 %oxidiser used up
+    if mdot_ox*t > m_ox %oxidiser used up
         qburnfin=1;
         disp('Ox used up');
     else
