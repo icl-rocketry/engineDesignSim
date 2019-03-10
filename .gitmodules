@@ -1,0 +1,3 @@
+[submodule "+NitrousModelling"]
+	path = +NitrousModelling
+	url = git@github.com:icl-rocketry/NitrousModelling.git
