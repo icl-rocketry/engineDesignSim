@@ -25,8 +25,8 @@ if rocketDesignParameters.port.type=="Dport"
 end
 
 
-rocketDesignParameters.I_total = 6500; %these are inputs that you choose
-rocketDesignParameters.F_init = 1000; %
+rocketDesignParameters.I_total = 13500; %these are inputs that you choose
+rocketDesignParameters.F_init = 1500; %
 rocketDesignParameters.t_burn  = rocketDesignParameters.I_total/rocketDesignParameters.F_init; %[s] total burn time in seconds
 
 rocketDesignParameters.P_cc     = 30*bar; %Chosen based on limits of tank pressurisation, and recommendations of [Physics of nitrous oxide, Aspire Space] in the drive
