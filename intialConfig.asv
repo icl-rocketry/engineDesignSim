@@ -1,10 +1,21 @@
 function rocketDesign = intialConfig(universalConstants, rocketDesignParameters, InitialConfigVars, regRateParams)
+
+
 %% Unpacking
 
 %Universal Constants
 g0    = universalConstants.g0;
 bar   = universalConstants.bar;
 P_amb = universalConstants.P_amb;
+
+%rocketDesignParameters
+
+if rocketDesignParameters.port.type=="Dport"
+    D_outer              = rocketDesignParameters.port.initialGuess.D_outer;
+    tau                  = rocketDesignParameters.port.initialGuess.tau;
+    fuelweb_initialguess = rocketDesignParameters.port.initialGuess.fuelweb_initialguess;
+end
+
 
 I_total= rocketDesignParameters.I_total;
 F_init = rocketDesignParameters.F_init;
@@ -61,12 +72,19 @@ mdot_oxinit = mdot_propinit-mdot_fuelinit; %[SPAD, eq 7.79]
 %c_star = etac*sqrt(gamma*R*T_flame)/(gamma*(2/(gamma+1))^((gamma+1)/(2*gamma-2))); %characteristic velocity [SPAD, eq 7.71]
 
 
+%% Configure Injector 
+
+[Ainj,Dinj,Vinj] = injectorConfig(P_cc,T_req);
+
 %% Configure Combustion Port
 %assume single cylindrical port
 
 GO_init = GO_max; %[kg/(m^2*s)] initial oxidiser flow flux [SPAD says blow-off/flooding limit is usually at 350-700 kg/m^2 s, so we used 350 to be safe]
 
 A_port = mdot_oxinit/GO_init; %[m^2] [SPAD, eq. 7.82]
+
+rocketDesign.port.type = rocketDesignParameters.port.type;
+
 
 Diameter_port_init = 2*sqrt(A_port/pi); %[m] initial port diameter
 Perimeter_port = pi*Diameter_port_init;
@@ -129,6 +147,8 @@ rocketDesign.mdot_fuelinit = mdot_fuelinit;
 rocketDesign.mdot_oxinit = mdot_oxinit;
 
 rocketDesign.Lp = Lp;
+
+rocketDesign.A_inj = A_inj;
 
 rocketDesign.A_throat = A_throat;
 

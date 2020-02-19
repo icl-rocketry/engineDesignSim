@@ -1,11 +1,11 @@
 %% make me a rocket with functions and structures
 
 clear all; close all; clc;
-addpath(genpath('NitrousModelling')) %adds NitrousModelling folders and subfolders to path, used in tank pressure simulation. From Eddie Brown.
 
 %% Setup
 
 %Universal Constants
+
 g0      = 9.81;         %[m/s^2]
 bar     = 100000;       %[Pa]
 P_amb   = 1.0135*bar;   %[Pa] ambient pressure;
@@ -20,12 +20,14 @@ rocketDesignParameters.I_total = 13500; % Desired Total Impulse
 rocketDesignParameters.F_init = 500; % Desired Thrust
 rocketDesignParameters.t_burn  = rocketDesignParameters.I_total/rocketDesignParameters.F_init; %[s] total burn time in seconds
 
-%% Combustion Parameters
+injectorDesignParams.n = 6; %Desired number of injector orifices 
+
+%% Other Parameters
 rocketDesignParameters.P_cc     = 30*bar; %Chosen based on limits of tank pressurisation, and recommendations of [Physics of nitrous oxide, Aspire Space] in the drive
 rocketDesignParameters.lambda   = 0.85;      %nozzle thrust efficiency factor
 rocketDesignParameters.rho_fuel = 993;    %density of fuel (kg/m^3), guess, should be determined more accurately
 rocketDesignParameters.etac     = 1;   %combustion efficiency [SPAD]
-rocketDesignParameters.GO_max   = 350;    %[kg/(m^2*s)] max oxidiser flow flux [SPAD says blow-off/flooding limit is usually at 350-700 kg/m^2 s, so we used 350 to be safe]
+rocketDesignParameters.GO_max   = 300;    %[kg/(m^2*s)] max oxidiser flow flux [SPAD says blow-off/flooding limit is usually at 350-700 kg/m^2 s, so we used 350 to be safe]
 
 InitialConfigVars.OF       = 7;   %intial oxidiser to fuel ratio (guess used for config)
 InitialConfigVars.T_req    = 25;   %[degrees C] Input for 'nitrous;' function: temperature of ox tank contents
@@ -48,19 +50,17 @@ regRateParams.m = 0;
 
 %% Injector Parameters
 
-injectorDesignParams.n = [1,3]; % Set number of injector orifices for each desired DISCRETE throttle state
-injectorDesignParams.throttle_states = [0.7,1.3]; % Set multiplier for desired DISCRETE throttle states
-injectorDesignParams.orificeType = 'sharp'; % Set type of orifice for determining head loss coeff. Options are 'sharp' and 'radiused'
+injectorDesignParams.n = [,3];
+injectorDesignParams.throttle_states = [0.7,1.3];
+injectorDesignParams.orificeType = 'sharp'; % Sets type of orifice for determining head loss coeff. Options are 'sharp' and 'radiused'
 
 %% Simulator Initialisation
 %time based simulator threshold and timestep
-
 thresh=1e-6; % in percentage - so 1e-2 is 1% change threshold.
 deltaT = 0.01; %s
 
 %% Output Select
 %outputConditions
-
 qplot = 1; %if 1, there will be an output displayed
 qdisp = 1; %if 1, there will be an output displayed
 
@@ -72,22 +72,21 @@ rocketDesign = intialConfig(universalConstants, rocketDesignParameters, InitialC
 
 injectorDesign = injectorConfig(injectorDesignParams,rocketDesign);
 
-%% Run Time Based Simulation
+%% run time based simulation
 
 [rocketPerformance, rocketSim] = timeBasedSimulator(universalConstants,rocketDesign,regRateParams,deltaT,thresh);
 
 
-%% Display Results
+%% display results
 
 disp('Simulation Successful')
 
 if qdisp == 1
     disp('All values are in SI units')
-    rocketDesign.port
-    rocketDesign
-    rocketPerformance
-    injectorDesign
+%    rocketPerformance
 end
+
+
 
 if qplot == 1
     

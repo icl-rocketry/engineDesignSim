@@ -30,14 +30,10 @@ expansionRatio = rocketDesign.expansionRatio;
 
 rocketSim.port=rocketDesign.port;
 
-if rocketSim.port.type == "circ"
-    rocketSim.port.diameter=rocketSim.port.IntialDiameter;
-    rocketSim.port.fuelweb = rocketSim.port.InitialFuelWeb;
-end
+rocketSim.port.diameter=rocketSim.port.IntialDiameter;
+rocketSim.port.fuelweb = rocketSim.port.InitialFuelWeb;
 
-if rocketSim.port.type == "Dport"
-    rocketSim.port.fuelweb = rocketSim.port.InitialFuelWeb;
-end
+
 
 %% Setup Tank and Injector Geometries
 
@@ -180,13 +176,10 @@ while qburnfin == 0
     Isp(ti) = F(ti)/(mdot_prop(ti)*g0);
     
     % 6. update geometry
-    switch rocketSim.port.type
-        case "circ"
-            rocketSim.port.fuelweb(ti+1)=rocketSim.port.fuelweb(ti)-rdot(ti)*deltaT;
-            rocketSim.port.diameter(ti+1)=rocketSim.port.diameter(ti)+rdot(ti)*deltaT;
-        case "Dport"
-            rocketSim.port.fuelweb(ti+1)=rocketSim.port.fuelweb(ti)-rdot(ti)*deltaT;
-    end
+
+    rocketSim.port.fuelweb(ti+1)=rocketSim.port.fuelweb(ti)-rdot(ti)*deltaT;
+    rocketSim.port.diameter(ti+1)=rocketSim.port.diameter(ti)+rdot(ti)*deltaT;
+
     
     %throat erosion
     
