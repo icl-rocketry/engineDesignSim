@@ -92,9 +92,6 @@ fuelweb=(Diameter_port_fin-Diameter_port_init)/2; %thickness of fuel that gets b
 
 PortParameters = [Diameter_port_fin,fuelweb];
 
-rocketDesign.port.FinalDiameter=Diameter_port_fin;
-rocketDesign.port.InitialFuelWeb=fuelweb;
-
 r = a*((GO_init+GF_init)^n)*(Lp^m); %calculate reg rate for reference
 
 %% determine nozzle area
@@ -136,6 +133,9 @@ rocketDesign.A_exit = A_exit;
 
 rocketDesign.expansionRatio=expansionRatio;
 
+rocketDesign.port.FinalDiameter=Diameter_port_fin;
+
+rocketDesign.port.InitialFuelWeb=fuelweb;
 
 %other design inputs that need to be carried over to rocketDesign
 rocketDesign.etac = rocketDesignParameters.etac;
@@ -145,6 +145,7 @@ rocketDesign.lambda = rocketDesignParameters.lambda;
 rocketDesign.rho_fuel = rocketDesignParameters.rho_fuel;
 
 rocketDesign.P_cc=rocketDesignParameters.P_cc;
+
 
 %%
 %useful line for debugging
