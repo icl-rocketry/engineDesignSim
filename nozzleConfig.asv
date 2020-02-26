@@ -114,40 +114,39 @@ for i = 1:3*n
     
 end
 
-%% Plotting - has been migrated to main makeMeARocket script
+%% Plotting
 
-% figure % Conical nozzle contour
-% plot(x_array,y_con,'k',[x_array(1) x_array(end)],[0 0],'-.b')
-% grid on
-% axis('image')
-% 
-% figure % nozzle flow properties with x
-% plot(x_array,M_con,'k',x_array,T_con,'r',x_array,P_con,'b');
-% legend('M','T','P')
-% grid on
-% 
-% figure % nozzle heat transfer coeff with x
-% plot(x_array,h_g)
-% grid on
-% 
-% figure
-% plot(x_array,h_g_simple)
-% grid on
+figure % Conical nozzle contour
+plot(x_array,y_con,'k',[x_array(1) x_array(end)],[0 0],'-.b')
+grid on
+axis('image')
+
+figure % nozzle flow properties with x
+plot(x_array,M_con,'k',x_array,T_con,'r',x_array,P_con,'b');
+legend('M','T','P')
+grid on
+
+figure % nozzle heat transfer coeff with x
+plot(x_array,h_g)
+grid on
+
+figure
+plot(x_array,h_g_simple)
+grid on
 
 %% Outputs
 
 nozzleDesignParams.A_throat = At;
 nozzleDesignParams.A_exit = Ae;
-nozzleDesignParams.A_dist = A_con;
+nozzleDesignParams.A_distribution = A_con;
 nozzleDesignParams.expansionRatio = exp_ratio;
-nozzleDesignParams.M_dist = M_con;
-nozzleDesignParams.P_dist = P_con;
-nozzleDesignParams.T_dist = T_con;
-nozzleDesignParams.rho_dist = rho_con;
-nozzleDesignParams.cross_section_dist = y_con;
-nozzleDesignParams.x_dist = x_array;
-nozzleDesignParams.vel_dist = V_con;
-nozzleDesignParams.hg_dist = h_g;
+nozzleDesignParams.Mach_distribution = M_con;
+nozzleDesignParams.P_distribution = P_con;
+nozzleDesignParams.T_distribution = T_con;
+nozzleDesignParams.rho_distribution = rho_con;
+nozzleDesignParams.cross_section_distribution = y_con;
+nozzleDesignParams.x_distribution = x_con;
+nozzleDesignParams.vel_distribution = V_con;
 nozzleDesignParams.throat_radius_ext = R;
 nozzleDesignParams.L_converging = abs(x_inlet);
 nozzleDesignParams.L_diverging = abs(x_outlet);

@@ -1,4 +1,4 @@
-function rocketDesign = intialConfig(universalConstants, rocketDesignParameters, InitialConfigVars, regRateParams)
+function rocketDesign = combustorConfig(universalConstants, rocketDesignParameters, InitialConfigVars, regRateParams)
 %% Unpacking
 
 %Universal Constants
@@ -136,6 +136,12 @@ rocketDesign.expansionRatio=expansionRatio;
 rocketDesign.port.FinalDiameter=Diameter_port_fin;
 
 rocketDesign.port.InitialFuelWeb=fuelweb;
+
+rocketDesign.T_flame = T_flame;
+
+rocketDesign.m_molar = m_mol;
+
+rocketDesign.gamma = gamma;
 
 %other design inputs that need to be carried over to rocketDesign
 rocketDesign.etac = rocketDesignParameters.etac;
