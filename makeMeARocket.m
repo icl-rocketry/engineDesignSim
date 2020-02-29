@@ -1,7 +1,7 @@
 %% make me a rocket with functions and structures
 
 clear all; close all; clc;
-addpath(genpath('NitrousModelling')) %adds NitrousModelling folders and subfolders to path, used in tank pressure simulation. From Eddie Brown.
+addpath(genpath('engineDesignSim\NitrousModelling\')) %adds NitrousModelling folders and subfolders to path, used in tank pressure simulation. From Eddie Brown.
 
 %% Setup
 
@@ -85,7 +85,6 @@ rocketDesign = combustorConfig(universalConstants, rocketDesignParameters, Initi
 %% Injector Configuration
 
 injectorDesign = injectorConfig(injectorDesignParams,rocketDesign);
-
 
 %% Nozzle Configuration
 
