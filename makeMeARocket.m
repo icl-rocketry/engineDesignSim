@@ -1,7 +1,6 @@
 %% make me a rocket with functions and structures
 
 clear all; close all; clc;
-addpath(genpath('engineDesignSim/NitrousModelling/')) %adds NitrousModelling folders and subfolders to path, used in tank pressure simulation. From Eddie Brown.
 
 %% Setup
 
