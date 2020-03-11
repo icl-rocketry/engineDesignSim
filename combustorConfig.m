@@ -81,7 +81,7 @@ GF_init = GO_init/OF; %initial fuel flow flux [SPAD, eq 7.83]
 %regression rate formula takes form of:
 % r= a G^n L^m where the coefficients are defined in regRateParams.mat
 
-Lp = (mdot_fuelinit/(rho_fuel*a*(GO_init+GF_init)^n*Perimeter_port))^(1/(m+1)); %length of port (m) [SPAD, eq 7.88]
+Lp = (mdot_fuelinit/(rho_fuel*a*((GO_init+GF_init)^n)*Perimeter_port))^(1/(m+1)); %length of port (m) [SPAD, eq 7.88]
 
 
 %only for circular:

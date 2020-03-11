@@ -16,7 +16,7 @@ universalConstants.P_amb   = P_amb;
 %% Desired Rocket Design Parameters ----------------- MAIN SCRIPT INPUTS -----------------------
 
 rocketDesignParameters.I_total = 13500; % Desired Total Impulse
-rocketDesignParameters.F_init = 500; % Desired Thrust
+rocketDesignParameters.F_init = 1000; % Desired Thrust
 rocketDesignParameters.t_burn  = rocketDesignParameters.I_total/rocketDesignParameters.F_init; %[s] total burn time in seconds
 
 %% Combustion Parameters
@@ -28,7 +28,7 @@ rocketDesignParameters.GO_max   = 350;    %[kg/(m^2*s)] max oxidiser flow flux [
 
 InitialConfigVars.OF       = 7;   %intial oxidiser to fuel ratio (guess used for config)
 InitialConfigVars.T_req    = 25;   %[degrees C] Input for 'nitrous;' function: temperature of ox tank contents
-InitialConfigVars.Isp_init = 185; %initial guess, should be iterated to maximise overall average Isp
+InitialConfigVars.Isp_init = 200; %initial guess, should be iterated to maximise overall average Isp
 InitialConfigVars.Isp_avg  = 0.98*InitialConfigVars.Isp_init;   %[SPAD 7.4.4] Says that the average Isp should be ~2.0% lower than initial
 
 %regRate
@@ -37,13 +37,13 @@ InitialConfigVars.Isp_avg  = 0.98*InitialConfigVars.Isp_init;   %[SPAD 7.4.4] Sa
 %regRateParams.m = -0.2;     %need correct values!
 
 %using numbers from adam bakers excel file.
-regRateParams.a = 0.0000236;
-regRateParams.n = 0.605;
-regRateParams.m = 0;
-
-% regRateParams.a = 0.0001146;
-% regRateParams.n = 0.5036;
+% regRateParams.a = 0.0000236;
+% regRateParams.n = 0.605;
 % regRateParams.m = 0;
+
+regRateParams.a = 0.0001146;
+regRateParams.n = 0.5036;
+regRateParams.m = 0;
 
 %% Injector Parameters
 
