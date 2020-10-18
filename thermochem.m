@@ -13,7 +13,7 @@ if(OF < min(OF_vals) || OF > max(OF_vals))
 end
 
 if(P_cc < min(P_cc_vals) || P_cc > max(P_cc_vals))
-    error('P_cc Out of bounds (thermochem)');
+    error(['P_cc Out of bounds (thermochem). Was ',num2str(P_cc)]);
 end
 
 T_flame = interp2(P_cc_vals,OF_vals,T_flame_data,P_cc,OF);  % [K] 

@@ -43,16 +43,15 @@ end
 
 
 %Change these parameters to alter the conditions of the chamber/injector
-PDownstream = 30e5; %Pressure downstream of orifice (Chamber pressure)
-AInjector1 = 0.25 * pi * (2e-3).^2; %Injector hole 1 cross section in m^3
-AInjector2 = 0.25 * pi * (2e-3).^2; %Injector hole 2 cross section in m^3
+AInjector1 = rocketDesign.A_inj / 2;%0.25 * pi * (2e-3).^2; %Injector hole 1 cross section in m^3
+AInjector2 = rocketDesign.A_inj / 2;%0.25 * pi * (2e-3).^2; %Injector hole 2 cross section in m^3
 %Discharge coefficient = "ratio of the actual discharge to the theoretical
 %discharge". Ideally empirically determined
-dischargeCoefficient1 = 0.8; %For injector orifice 1
-dischargeCoefficient2 = 0.8; %For injector orifice 2
+dischargeCoefficient1 = 0.77; %For injector orifice 1
+dischargeCoefficient2 = 0.77; %For injector orifice 2
 
 %Change these parameters to alter the conditions of the tank
-initialInternalTankTemp = 27+273.15; %Starting tank temperature in kelvin
+initialInternalTankTemp = rocketDesign.T_req+273.15; %Starting tank temperature in kelvin
 initialInternalNitrousMass = 6; %Kg
 internalTankHeight = 0.8; %Metres, very approximate geometry
 internalTankCrossSectionA = 0.25 * pi * (150e-3)^2; %M^2, very approximate geometry
@@ -157,6 +156,11 @@ while qburnfin == 0
         % 5. determine eng perf
         
         P_cc(ti) = mdot_prop(ti)*c_star(ti)/A_throat; %assume there is no throat erosion for now - should be updated
+        
+        if(P_cc(ti) < 15e5)
+           disp("Fudging chamber pressure to be 15 bar. Was: "+(P_cc(ti)/1e5)+" bar");
+           P_cc(ti) = 15e5; 
+        end
         
         val(loopind+1) = P_cc(ti);
         

@@ -30,6 +30,7 @@ GO_max   = rocketDesignParameters.GO_max;
 %InitialConfigVars
 OF       = InitialConfigVars.OF;
 T_req    = InitialConfigVars.T_req;
+rocketDesign.T_req = T_req;
 Isp_init = InitialConfigVars.Isp_init;
 Isp_avg  = InitialConfigVars.Isp_avg;
 
@@ -103,9 +104,14 @@ P_tank = P_vap; %given, "nitrous" (?) [see engine_config_v6
 
 dP_inj = 0.15*P_cc; %must be high enough to isolate feed system from pressure transients in the CC [SPAD Page 232]
 A_inj = mdot_propinit*sqrt(K_inj/(2*rho_fuel*dP_inj));
-d_inj = 2*sqrt(A_inj/pi); %diamter of 1 injector hole
-drill_lim_inj = 0.5e-3; %[m] limit of hole diameter for injector
-holenum_inj = d_inj/drill_lim_inj;
+
+%FUDGE INJECTOR AREA
+A_inj = A_inj * 0.5;
+disp("Halving injector area... (fudge)");
+
+% d_inj = 2*sqrt(A_inj/pi); %diamter of 1 injector hole
+% drill_lim_inj = 0.5e-3; %[m] limit of hole diameter for injector
+% holenum_inj = d_inj/drill_lim_inj;
 %A_valve = 0.02; %standin valu
 
 %A_inj = (mdot_oxinit^2/(2*rho_ox*Cdis_inj^2))*(P_tank - P_cc - (mdot_oxinit/(Cdis_valve*A_valve))^2*(1/(2*rho_ox)))^(-1); % WRONG FIX IT    Design output for area of injector orifices
@@ -187,7 +193,6 @@ r = a*((GO_init+GF_init)^n)*(Lp^m); %calculate reg rate for reference
 %we can determine the throat area required to choke the flow.
 
 A_throat = mdot_propinit*etac*sqrt(gamma*R*T_flame)*((gamma+1)/2)^((gamma+1)/(2*gamma-2))/(P_cc*gamma);
-
 
 %note for above: used the T_flame as total temperature of flow which is
 %probably inaccurate.

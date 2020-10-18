@@ -26,7 +26,8 @@ end
 
 
 rocketDesignParameters.I_total = 13500; %these are inputs that you choose
-rocketDesignParameters.F_init = 1500; %
+%Needs to be converged with output, if completely wrong will cause issue
+rocketDesignParameters.F_init = 1000; %Determines a nozzle size, which then may not match up with what the feed system can provide and thus chamber pressure can get fucked and thus everything is sad
 rocketDesignParameters.t_burn  = rocketDesignParameters.I_total/rocketDesignParameters.F_init; %[s] total burn time in seconds
 
 rocketDesignParameters.P_cc     = 30*bar; %Chosen based on limits of tank pressurisation, and recommendations of [Physics of nitrous oxide, Aspire Space] in the drive
@@ -39,7 +40,7 @@ rocketDesignParameters.GO_max   = 350;    %[kg/(m^2*s)] max oxidiser flow flux [
 %InitialConfigVars
 
 InitialConfigVars.OF       = 7;   %intial oxidiser to fuel ratio (guess used for config)
-InitialConfigVars.T_req    = 25;   %[degrees C] Input for 'nitrous;' function: temperature of ox tank contents
+InitialConfigVars.T_req    = 20;  %[degrees C] Input for 'nitrous;' function: temperature of ox tank contents
 InitialConfigVars.Isp_init = 200; %initial guess, should be iterated to maximise overall average Isp
 InitialConfigVars.Isp_avg  = 0.98*InitialConfigVars.Isp_init;   %[SPAD 7.4.4] Says that the average Isp should be ~2.0% lower than initial
 
