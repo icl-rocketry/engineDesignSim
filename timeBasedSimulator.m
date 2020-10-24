@@ -23,7 +23,7 @@ P_cc=rocketDesign.P_cc;
 mdot_oxinit = rocketDesign.mdot_oxinit;
 mdot_ox = mdot_oxinit; %assumed constant throughout burn
 %m_ox = rocketDesign.m_ox;
-m_ox = 6;
+% m_ox = 6;
 A_exit = rocketDesign.A_exit;
 A_throat = rocketDesign.A_throat;
 expansionRatio = rocketDesign.expansionRatio;
@@ -115,9 +115,9 @@ while qburnfin == 0
     
     for loopind = 1:1000
         
-        S(ti) = P_port*Lp;
+        S(ti) = P_port*Lp; %Port surface area = Port perimeter * port length
         
-        rdot(ti) = a*G_prop(ti)^n*Lp^m;
+        rdot(ti) = a*G_prop(ti)^n*Lp^m; %SPAD Hybrids eqn 7.28 for average reg rate
         
         
         mdot_fuel(ti) = rdot(ti)*rho_fuel*S(ti);
@@ -209,24 +209,16 @@ while qburnfin == 0
     % (2) Choked flow
     % (3) fuel is not entirely eaten up
     
-    if mdot_ox*t > m_ox %oxidiser used up
+    if rocketSim.port.fuelweb(end)<=0 %using only condition 3 for now
         qburnfin=1;
-        disp('Ox used up');
+        disp('Fuel Web used up')
     else
-        if rocketSim.port.fuelweb(end)<=0 %using only condition 3 for now
+        if tank.mLiquid <= 0.01
             qburnfin=1;
-            disp('Fuel Web used up')
         else
-            if tank.mLiquid <= 0.01
-                qburnfin=1;
-            else
-                qburnfin=0;
-            end
+            qburnfin=0;
         end
     end
-        
-    
-    
     
 end
 

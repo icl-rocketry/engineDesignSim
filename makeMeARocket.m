@@ -1,5 +1,5 @@
 %% make me a rocket with functions and structures
-
+addpath('NitrousModelling');
 clear all; close all; clc;
 
 %%
