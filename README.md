@@ -9,5 +9,5 @@ Updated(Simscape/simulink) model improvements over this one:
 - Has more datapoints for the combustion products (WIP)
 - Easier to unstand as more visual to interact with and equations can be directly annotated onto the canvas (using latex syntax for symbols)
 
-#Description
+# Description
 Config and simulation codes and relevant functions in  Matlab for EDP engine design
